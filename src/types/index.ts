@@ -1,3 +1,4 @@
+
 import type { LucideIcon } from 'lucide-react';
 
 export interface Department {
@@ -5,7 +6,7 @@ export interface Department {
   name: string;
   capacity: number;
   description: string;
-  iconName: keyof typeof import('lucide-react')['icons'] | 'CustomAcademicCap'; 
+  iconName: keyof typeof import('lucide-react')['icons'] | 'CustomAcademicCap' | (string & {}); // Allow any string for iconName initially
   assignedStudents: string[]; // Roll numbers of students already assigned
 }
 
