@@ -1,9 +1,11 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import type { AuthenticatedUser, Student } from '@/types';
-import { MOCK_STUDENTS } from '@/lib/constants';
+// MOCK_STUDENTS is no longer used for login, but might be used elsewhere or for future features.
+// import { MOCK_STUDENTS } from '@/lib/constants'; 
 
 const AUTH_STORAGE_KEY = 'electiveNavigatorUser';
 
@@ -35,22 +37,27 @@ export function useAuth(): UseAuthReturn {
 
   const login = useCallback(async (rollNumber: string, passwordAttempt: string): Promise<boolean> => {
     setIsLoading(true);
-    const studentData = MOCK_STUDENTS.find(s => s.rollNumber === rollNumber && s.password === passwordAttempt);
-    if (studentData) {
-      // For a real app, fetch full student profile here, including preferences and assignments
-      // For this mock, we assume a new user or fetch from a broader student list if needed
-      const userToStore: AuthenticatedUser = {
-        rollNumber: studentData.rollNumber,
-        name: studentData.name,
-        preferences: [], // Default to empty, student will select
-        assignedElective: null, // Default to null
+
+    // Define admin credentials
+    const ADMIN_ROLL_NUMBER = 'admin';
+    const ADMIN_PASSWORD = 'adminpass'; // In a real app, use a more secure password
+    const ADMIN_NAME = 'Administrator';
+
+    if (rollNumber === ADMIN_ROLL_NUMBER && passwordAttempt === ADMIN_PASSWORD) {
+      const adminUser: AuthenticatedUser = {
+        rollNumber: ADMIN_ROLL_NUMBER,
+        name: ADMIN_NAME,
+        preferences: [], // Admin likely doesn't have elective preferences
+        assignedElective: null, // Admin likely isn't assigned an elective
         assignmentReason: null,
       };
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userToStore));
-      setCurrentUser(userToStore);
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(adminUser));
+      setCurrentUser(adminUser);
       setIsLoading(false);
       return true;
     }
+    
+    // If credentials do not match admin, login fails
     setIsLoading(false);
     return false;
   }, []);
