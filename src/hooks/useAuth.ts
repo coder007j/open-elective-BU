@@ -60,13 +60,13 @@ export function useAuth(): UseAuthReturn {
     // If credentials do not match admin, login fails
     setIsLoading(false);
     return false;
-  }, []);
+  }, [setCurrentUser, setIsLoading]); // Added setCurrentUser and setIsLoading to dependency array
 
   const logout = useCallback(() => {
     localStorage.removeItem(AUTH_STORAGE_KEY);
     setCurrentUser(null);
     router.push('/'); // Redirect to login page
-  }, [router]);
+  }, [router, setCurrentUser]); // Added setCurrentUser to dependency array
 
   const updateUserAssignment = useCallback((assignedElectiveId: string | null, reason: string | null) => {
     setCurrentUser(prevUser => {
@@ -79,8 +79,9 @@ export function useAuth(): UseAuthReturn {
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedUser));
       return updatedUser;
     });
-  }, []);
+  }, [setCurrentUser]); // Added setCurrentUser to dependency array
 
 
   return { currentUser, isLoading, login, logout, updateUserAssignment };
 }
+
