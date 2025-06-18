@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect } from 'react';
@@ -12,7 +13,11 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!isLoading && currentUser) {
-      router.replace('/dashboard');
+      if (currentUser.rollNumber === 'admin') {
+        router.replace('/admin/dashboard');
+      } else {
+        router.replace('/dashboard');
+      }
     }
   }, [currentUser, isLoading, router]);
 

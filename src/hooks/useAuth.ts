@@ -3,9 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import type { AuthenticatedUser, Student } from '@/types';
-// MOCK_STUDENTS is no longer used for login, but might be used elsewhere or for future features.
-// import { MOCK_STUDENTS } from '@/lib/constants'; 
+import type { AuthenticatedUser } from '@/types';
 
 const AUTH_STORAGE_KEY = 'electiveNavigatorUser';
 
@@ -38,35 +36,34 @@ export function useAuth(): UseAuthReturn {
   const login = useCallback(async (rollNumber: string, passwordAttempt: string): Promise<boolean> => {
     setIsLoading(true);
 
-    // Define admin credentials
     const ADMIN_ROLL_NUMBER = 'admin';
-    const ADMIN_PASSWORD = 'adminpass'; // In a real app, use a more secure password
+    const ADMIN_PASSWORD = 'adminpass';
     const ADMIN_NAME = 'Administrator';
 
     if (rollNumber === ADMIN_ROLL_NUMBER && passwordAttempt === ADMIN_PASSWORD) {
       const adminUser: AuthenticatedUser = {
         rollNumber: ADMIN_ROLL_NUMBER,
         name: ADMIN_NAME,
-        preferences: [], // Admin likely doesn't have elective preferences
-        assignedElective: null, // Admin likely isn't assigned an elective
+        preferences: [],
+        assignedElective: null,
         assignmentReason: null,
       };
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(adminUser));
       setCurrentUser(adminUser);
       setIsLoading(false);
+      router.push("/admin/dashboard"); // Redirect admin to admin dashboard
       return true;
     }
     
-    // If credentials do not match admin, login fails
     setIsLoading(false);
     return false;
-  }, [setCurrentUser, setIsLoading]); // Added setCurrentUser and setIsLoading to dependency array
+  }, [router, setCurrentUser, setIsLoading]);
 
   const logout = useCallback(() => {
     localStorage.removeItem(AUTH_STORAGE_KEY);
     setCurrentUser(null);
-    router.push('/'); // Redirect to login page
-  }, [router, setCurrentUser]); // Added setCurrentUser to dependency array
+    router.push('/'); 
+  }, [router, setCurrentUser]);
 
   const updateUserAssignment = useCallback((assignedElectiveId: string | null, reason: string | null) => {
     setCurrentUser(prevUser => {
@@ -79,9 +76,8 @@ export function useAuth(): UseAuthReturn {
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedUser));
       return updatedUser;
     });
-  }, [setCurrentUser]); // Added setCurrentUser to dependency array
+  }, [setCurrentUser]);
 
 
   return { currentUser, isLoading, login, logout, updateUserAssignment };
 }
-
