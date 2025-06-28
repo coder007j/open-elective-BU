@@ -61,7 +61,7 @@ export function LoginForm() {
           name="rollNumber"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Roll Number / Admin ID</FormLabel>
+              <FormLabel>Roll Number / ID</FormLabel>
               <div className="relative">
                 <UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <FormControl>

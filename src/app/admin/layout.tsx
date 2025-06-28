@@ -38,7 +38,7 @@ export default function AdminDashboardLayout({
         {children}
       </main>
       <footer className="py-4 text-center text-sm text-muted-foreground border-t">
-        © {new Date().getFullYear()} Open Elective - Admin Panel.
+        © {new Date().getFullYear()} Open Elective - Department Panel.
       </footer>
     </div>
   );

@@ -32,7 +32,7 @@ export function LoginTabs() {
             </TabsTrigger>
             <TabsTrigger value="admin">
               <Shield className="mr-2 h-4 w-4" />
-              Administrator
+              Department
             </TabsTrigger>
           </TabsList>
           <TabsContent value="student" className="pt-4">
@@ -43,7 +43,7 @@ export function LoginTabs() {
           </TabsContent>
           <TabsContent value="admin" className="pt-4">
             <p className="text-sm text-center text-muted-foreground mb-4">
-              Enter admin credentials to manage departments and students.
+              Enter department credentials to manage departments and students.
             </p>
             <LoginForm />
           </TabsContent>

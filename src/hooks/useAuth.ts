@@ -42,7 +42,7 @@ export function useAuth(): UseAuthReturn {
     
     const ADMIN_ROLL_NUMBER = 'admin';
     const ADMIN_PASSWORD = 'adminpass';
-    const ADMIN_NAME = 'Administrator';
+    const ADMIN_NAME = 'Department';
 
     let userToAuth: AuthenticatedUser | null = null;
 
