@@ -10,7 +10,7 @@ import Link from "next/link";
 export function AppHeader() {
   const { logout, currentUser } = useAuth();
 
-  const homeLink = currentUser?.rollNumber === 'admin' ? "/admin/dashboard" : "/dashboard";
+  const homeLink = currentUser?.rollNumber === 'department' ? "/admin/dashboard" : "/dashboard";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">

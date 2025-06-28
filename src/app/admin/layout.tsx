@@ -17,13 +17,13 @@ export default function AdminDashboardLayout({
 
   useEffect(() => {
     if (!isLoading) {
-      if (!currentUser || currentUser.rollNumber !== 'admin') {
+      if (!currentUser || currentUser.rollNumber !== 'department') {
         router.replace('/'); // Redirect to login if not admin or not authenticated
       }
     }
   }, [currentUser, isLoading, router]);
 
-  if (isLoading || !currentUser || currentUser.rollNumber !== 'admin') {
+  if (isLoading || !currentUser || currentUser.rollNumber !== 'department') {
     return (
       <div className="flex flex-1 items-center justify-center min-h-screen bg-background">
          <Loader2 className="h-12 w-12 animate-spin text-primary" />

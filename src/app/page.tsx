@@ -13,7 +13,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!isLoading && currentUser) {
-      if (currentUser.rollNumber === 'admin') {
+      if (currentUser.rollNumber === 'department') {
         router.replace('/admin/dashboard');
       } else {
         router.replace('/dashboard');

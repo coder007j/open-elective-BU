@@ -39,7 +39,7 @@ export function useAuth(): UseAuthReturn {
   const login = useCallback(async (rollNumber: string, passwordAttempt: string): Promise<boolean> => {
     setIsLoading(true);
     
-    const ADMIN_ROLL_NUMBER = 'admin';
+    const ADMIN_ROLL_NUMBER = 'department';
     const ADMIN_PASSWORD = 'adminpass';
     const ADMIN_NAME = 'Department';
 
@@ -49,7 +49,7 @@ export function useAuth(): UseAuthReturn {
       userToAuth = {
         rollNumber: ADMIN_ROLL_NUMBER,
         name: ADMIN_NAME,
-        homeDepartmentId: 'admin',
+        homeDepartmentId: 'department',
         preferences: [],
         assignedElective: null,
         assignmentReason: null,

@@ -17,7 +17,7 @@ export default function AdminDashboardPage() {
     );
   }
 
-  if (!currentUser || currentUser.rollNumber !== 'admin') {
+  if (!currentUser || currentUser.rollNumber !== 'department') {
     return (
        <Card className="w-full max-w-lg mx-auto">
         <CardHeader>
