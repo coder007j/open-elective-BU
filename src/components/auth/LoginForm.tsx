@@ -41,13 +41,14 @@ export function LoginForm() {
 
   async function onSubmit(values: LoginFormValues) {
     setIsLoading(true);
-    const success = await login(values.rollNumber, values.password);
-    setIsLoading(false);
+    const errorMessage = await login(values.rollNumber, values.password);
     
-    if (!success) {
+    // Only set loading to false if login fails, otherwise we are redirecting
+    if (errorMessage) {
+      setIsLoading(false);
       toast({
         title: "Login Failed",
-        description: "Invalid credentials. Please check and try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     }

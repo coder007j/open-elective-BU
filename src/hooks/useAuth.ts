@@ -11,7 +11,7 @@ const AUTH_STORAGE_KEY = 'openElectiveUser';
 interface UseAuthReturn {
   currentUser: AuthenticatedUser | null;
   isLoading: boolean;
-  login: (rollNumber: string, passwordAttempt: string) => Promise<boolean>;
+  login: (rollNumber: string, passwordAttempt: string) => Promise<string | null>; // Changed return type
   logout: () => void;
   savePreferences: (preferences: string[]) => void;
   updateUserAssignment: (assignedElectiveId: string | null, reason: string | null) => void;
@@ -35,49 +35,45 @@ export function useAuth(): UseAuthReturn {
     setIsLoading(false);
   }, []);
 
-  const login = async (rollNumber: string, passwordAttempt: string): Promise<boolean> => {
-    setIsLoading(true);
+  const login = useCallback(async (rollNumber: string, passwordAttempt: string): Promise<string | null> => {
+    const allStudentsData = localStorage.getItem('allStudentsData');
+    const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : MOCK_STUDENTS;
 
-    const ADMIN_ROLL_NUMBER = 'department';
-    const ADMIN_PASSWORD = 'adminpass';
+    let userToAuth: Student | null = null;
+    let isAdmin = false;
 
-    let authenticatedUser: AuthenticatedUser | null = null;
-
-    if (rollNumber === ADMIN_ROLL_NUMBER && passwordAttempt === ADMIN_PASSWORD) {
-        authenticatedUser = {
-            rollNumber: ADMIN_ROLL_NUMBER,
-            name: 'Department',
-            homeDepartmentId: 'department',
-            preferences: [],
-            assignedElective: null,
-            assignmentReason: null,
-            homeDeptApproval: false,
-            electiveDeptApproval: false,
-        };
+    if (rollNumber === 'department' && passwordAttempt === 'adminpass') {
+      isAdmin = true;
+      userToAuth = {
+        rollNumber: 'department',
+        name: 'Department',
+        password: 'adminpass',
+        homeDepartmentId: 'admin',
+        preferences: [],
+        assignedElective: null,
+        assignmentReason: null,
+        homeDeptApproval: false,
+        electiveDeptApproval: false,
+      };
     } else {
-        const allStudentsData = localStorage.getItem('allStudentsData');
-        const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : MOCK_STUDENTS;
-        const studentData = students.find(s => s.rollNumber === rollNumber && s.password === passwordAttempt);
-
-        if (studentData) {
-            const { password, ...userData } = studentData;
-            authenticatedUser = userData;
-        }
-    }
-
-    setIsLoading(false);
-
-    if (authenticatedUser) {
-        setCurrentUser(authenticatedUser);
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authenticatedUser));
-        return true;
+      userToAuth = students.find(s => s.rollNumber === rollNumber && s.password === passwordAttempt) || null;
     }
     
-    // If login fails, ensure state is clean
-    setCurrentUser(null);
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-    return false;
-  };
+    if (userToAuth) {
+      const { password, ...userData } = userToAuth;
+      setCurrentUser(userData);
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
+      
+      if (isAdmin) {
+        router.replace('/admin/dashboard');
+      } else {
+        router.replace('/dashboard');
+      }
+      return null; // Success
+    }
+    
+    return "Invalid credentials. Please check and try again."; // Failure
+  }, [router]);
 
   const logout = useCallback(() => {
     localStorage.removeItem(AUTH_STORAGE_KEY);
@@ -98,7 +94,6 @@ export function useAuth(): UseAuthReturn {
       };
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedUser));
 
-      // Also update the master student list in localStorage for persistence
       try {
         const allStudentsData = localStorage.getItem('allStudentsData');
         const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : MOCK_STUDENTS;
