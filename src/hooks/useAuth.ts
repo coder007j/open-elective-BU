@@ -26,8 +26,7 @@ export function useAuth(): UseAuthReturn {
     try {
       const storedUser = localStorage.getItem(AUTH_STORAGE_KEY);
       if (storedUser) {
-        const user = JSON.parse(storedUser);
-        setCurrentUser(user);
+        setCurrentUser(JSON.parse(storedUser));
       }
     } catch (error) {
       console.error("Failed to load user from localStorage", error);
@@ -36,19 +35,18 @@ export function useAuth(): UseAuthReturn {
     setIsLoading(false);
   }, []);
 
-  const login = useCallback(async (rollNumber: string, passwordAttempt: string): Promise<boolean> => {
+  const login = async (rollNumber: string, passwordAttempt: string): Promise<boolean> => {
     setIsLoading(true);
     
     const ADMIN_ROLL_NUMBER = 'department';
     const ADMIN_PASSWORD = 'adminpass';
-    const ADMIN_NAME = 'Department';
 
     let userToAuth: AuthenticatedUser | null = null;
 
     if (rollNumber === ADMIN_ROLL_NUMBER && passwordAttempt === ADMIN_PASSWORD) {
       userToAuth = {
         rollNumber: ADMIN_ROLL_NUMBER,
-        name: ADMIN_NAME,
+        name: 'Department',
         homeDepartmentId: 'department',
         preferences: [],
         assignedElective: null,
@@ -57,9 +55,14 @@ export function useAuth(): UseAuthReturn {
         electiveDeptApproval: false,
       };
     } else {
-      const studentData = MOCK_STUDENTS.find(
+      // Unify student data source - check localStorage first, then mock data.
+      const allStudentsData = localStorage.getItem('allStudentsData');
+      const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : MOCK_STUDENTS;
+
+      const studentData = students.find(
         (s) => s.rollNumber === rollNumber && s.password === passwordAttempt
       );
+
       if (studentData) {
         // Find if there's a stored version of the user to persist their preferences across logins
         const storedUser = localStorage.getItem(AUTH_STORAGE_KEY);
@@ -81,7 +84,7 @@ export function useAuth(): UseAuthReturn {
     }
 
     return false;
-  }, []);
+  };
 
   const logout = useCallback(() => {
     localStorage.removeItem(AUTH_STORAGE_KEY);
