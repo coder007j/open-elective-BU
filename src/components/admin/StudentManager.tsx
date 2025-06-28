@@ -12,21 +12,20 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { Student } from '@/types';
-import { MOCK_STUDENTS } from '@/lib/constants'; // Assuming initial data might come from here
+import { MOCK_STUDENTS } from '@/lib/constants';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 const studentSchema = z.object({
   rollNumber: z.string().min(1, { message: "Roll number is required." }),
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }), // For mock purposes
+  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  homeDepartmentId: z.string().min(1, { message: "Home department ID is required." }),
 });
 
 type StudentFormValues = z.infer<typeof studentSchema>;
-type AdminManagedStudent = Omit<Student, 'preferences' | 'assignedElective' | 'assignmentReason'>;
-
 
 export function StudentManager() {
-  const [students, setStudents] = useState<AdminManagedStudent[]>(MOCK_STUDENTS);
+  const [students, setStudents] = useState<Student[]>(MOCK_STUDENTS);
   const [isAddStudentDialogOpen, setIsAddStudentDialogOpen] = useState(false);
 
   const form = useForm<StudentFormValues>({
@@ -35,14 +34,18 @@ export function StudentManager() {
       rollNumber: "",
       name: "",
       password: "",
+      homeDepartmentId: "cs",
     },
   });
 
   const handleAddStudent = (values: StudentFormValues) => {
-    const newStudent: AdminManagedStudent = {
-      rollNumber: values.rollNumber,
-      name: values.name,
-      password: values.password, // Store password for mock login; in real app, hash it
+    const newStudent: Student = {
+      ...values,
+      preferences: [],
+      assignedElective: null,
+      assignmentReason: null,
+      homeDeptApproval: false,
+      electiveDeptApproval: false,
     };
     setStudents(prev => [...prev, newStudent]);
     setIsAddStudentDialogOpen(false);
@@ -112,6 +115,19 @@ export function StudentManager() {
                       </FormItem>
                     )}
                   />
+                   <FormField
+                    control={form.control}
+                    name="homeDepartmentId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Home Department ID</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., cs, mech" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <DialogFooter>
                      <DialogClose asChild>
                         <Button type="button" variant="outline">Cancel</Button>
@@ -135,27 +151,21 @@ export function StudentManager() {
                    <div className="flex justify-between items-start">
                       <div>
                         <CardTitle className="text-lg">{student.name} ({student.rollNumber})</CardTitle>
-                        {/* In a real app, you wouldn't display assigned elective here as admin manages base details */}
-                        {/* <CardDescription>Assigned: {student.assignedElective || 'N/A'}</CardDescription> */}
+                        <CardDescription>Home Dept: {student.homeDepartmentId}</CardDescription>
                       </div>
                        <div className="flex space-x-2">
-                        <Button variant="outline" size="sm" disabled> {/* Placeholder */}
+                        <Button variant="outline" size="sm" disabled>
                           <Eye className="h-4 w-4 mr-1" /> View/Assign
                         </Button>
-                        <Button variant="outline" size="sm" disabled> {/* Placeholder */}
+                        <Button variant="outline" size="sm" disabled>
                           <Edit className="h-4 w-4 mr-1" /> Edit
                         </Button>
-                        <Button variant="destructive" size="sm" disabled> {/* Placeholder */}
+                        <Button variant="destructive" size="sm" disabled>
                           <Trash2 className="h-4 w-4 mr-1" /> Delete
                         </Button>
                       </div>
                    </div>
                 </CardHeader>
-                 {/* 
-                <CardContent>
-                   Placeholder for more details if needed, e.g., view preferences
-                </CardContent>
-                */}
               </Card>
             ))}
           </div>

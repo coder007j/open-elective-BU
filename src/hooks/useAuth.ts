@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import type { AuthenticatedUser } from '@/types';
+import type { AuthenticatedUser, Student } from '@/types';
 import { MOCK_STUDENTS } from '@/lib/constants';
 
 const AUTH_STORAGE_KEY = 'openElectiveUser';
@@ -13,6 +13,7 @@ interface UseAuthReturn {
   isLoading: boolean;
   login: (rollNumber: string, passwordAttempt: string) => Promise<boolean>;
   logout: () => void;
+  savePreferences: (preferences: string[]) => void;
   updateUserAssignment: (assignedElectiveId: string | null, reason: string | null) => void;
 }
 
@@ -26,8 +27,6 @@ export function useAuth(): UseAuthReturn {
       const storedUser = localStorage.getItem(AUTH_STORAGE_KEY);
       if (storedUser) {
         const user = JSON.parse(storedUser);
-        // On load, check if there's a more complete user object in storage
-        // This preserves state across refreshes
         setCurrentUser(user);
       }
     } catch (error) {
@@ -46,50 +45,65 @@ export function useAuth(): UseAuthReturn {
 
     let userToAuth: AuthenticatedUser | null = null;
 
-    // Check for admin
     if (rollNumber === ADMIN_ROLL_NUMBER && passwordAttempt === ADMIN_PASSWORD) {
       userToAuth = {
         rollNumber: ADMIN_ROLL_NUMBER,
         name: ADMIN_NAME,
+        homeDepartmentId: 'admin',
         preferences: [],
         assignedElective: null,
         assignmentReason: null,
+        homeDeptApproval: false,
+        electiveDeptApproval: false,
       };
-    } else { // Check for student
+    } else {
       const studentData = MOCK_STUDENTS.find(
         (s) => s.rollNumber === rollNumber && s.password === passwordAttempt
       );
       if (studentData) {
-        // On successful student login, create a full user object.
-        // In a real app, you'd fetch their saved preferences from a DB here.
-        userToAuth = {
-          rollNumber: studentData.rollNumber,
-          name: studentData.name,
-          preferences: [],
-          assignedElective: null,
-          assignmentReason: null,
-        };
+        // Find if there's a stored version of the user to persist their preferences across logins
+        const storedUser = localStorage.getItem(AUTH_STORAGE_KEY);
+        if(storedUser && JSON.parse(storedUser).rollNumber === rollNumber) {
+          userToAuth = JSON.parse(storedUser);
+        } else {
+          const { password, ...rest } = studentData;
+          userToAuth = rest;
+        }
       }
     }
     
     setIsLoading(false);
 
     if (userToAuth) {
-      // Upon new login, store the fresh user state.
-      // This overwrites any previous state for that user, which is typical for login.
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userToAuth));
       setCurrentUser(userToAuth);
       return true;
     }
 
     return false;
-  }, [setCurrentUser, setIsLoading]);
+  }, []);
 
   const logout = useCallback(() => {
     localStorage.removeItem(AUTH_STORAGE_KEY);
     setCurrentUser(null);
     router.push('/'); 
-  }, [router, setCurrentUser]);
+  }, [router]);
+  
+  const savePreferences = useCallback((preferences: string[]) => {
+    setCurrentUser(prevUser => {
+      if (!prevUser) return null;
+      const updatedUser: AuthenticatedUser = {
+        ...prevUser,
+        preferences: preferences,
+        assignedElective: null,
+        assignmentReason: 'Your preferences have been saved and are now awaiting approval.',
+        homeDeptApproval: false,
+        electiveDeptApproval: false,
+      };
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedUser));
+      return updatedUser;
+    });
+  }, []);
 
   const updateUserAssignment = useCallback((assignedElectiveId: string | null, reason: string | null) => {
     setCurrentUser(prevUser => {
@@ -102,8 +116,7 @@ export function useAuth(): UseAuthReturn {
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedUser));
       return updatedUser;
     });
-  }, [setCurrentUser]);
+  }, []);
 
-
-  return { currentUser, isLoading, login, logout, updateUserAssignment };
+  return { currentUser, isLoading, login, logout, savePreferences, updateUserAssignment };
 }

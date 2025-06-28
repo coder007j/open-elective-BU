@@ -1,9 +1,8 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import type { Department, AuthenticatedUser } from '@/types';
-import type { AssignElectivesInput, AssignElectivesOutput } from '@/ai/flows/assign-electives';
-import { assignElectives } from '@/ai/flows/assign-electives';
+import type { Department } from '@/types';
 import { DepartmentCard } from './DepartmentCard';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,17 +10,17 @@ import { useToast } from '@/hooks/use-toast';
 import { DEPARTMENTS_DATA, MAX_PREFERENCES } from '@/lib/constants';
 import { AssignmentResultDisplay } from './AssignmentResultDisplay';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info, Loader2, Send } from 'lucide-react';
+import { Info, Loader2, Send, Clock } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function ElectiveSelectionClient() {
-  const { currentUser, updateUserAssignment } = useAuth();
+  const { currentUser, savePreferences } = useAuth();
   const { toast } = useToast();
 
-  const [departments, setDepartments] = useState<Department[]>(DEPARTMENTS_DATA);
-  const [selectedPreferences, setSelectedPreferences] = useState<string[]>(currentUser?.preferences || []);
+  const [departments] = useState<Department[]>(DEPARTMENTS_DATA);
+  const [selectedPreferences, setSelectedPreferences] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Initialize preferences from currentUser if available
   useEffect(() => {
     if (currentUser?.preferences) {
       setSelectedPreferences(currentUser.preferences);
@@ -39,7 +38,6 @@ export function ElectiveSelectionClient() {
       toast({
         title: "Selection Limit Reached",
         description: `You can only select up to ${MAX_PREFERENCES} departments.`,
-        variant: "default",
       });
       return prev;
     });
@@ -51,63 +49,55 @@ export function ElectiveSelectionClient() {
       return;
     }
     if (selectedPreferences.length === 0) {
-      toast({ title: "No Preferences Selected", description: "Please select at least one department.", variant: "default" });
+      toast({ title: "No Preferences Selected", description: "Please select at least one department." });
       return;
     }
 
     setIsLoading(true);
-
-    const studentPreferencesNames = selectedPreferences.map(id => {
-      const dept = departments.find(d => d.id === id);
-      return dept ? dept.name : id; // Fallback to ID if name not found, though unlikely
+    savePreferences(selectedPreferences);
+    toast({
+      title: "Preferences Submitted",
+      description: "Your choices have been saved and are awaiting approval.",
     });
-
-    const assignmentInput: AssignElectivesInput = {
-      students: [{
-        rollNumber: currentUser.rollNumber,
-        preferences: studentPreferencesNames,
-      }],
-      departments: departments.map(dept => ({
-        name: dept.name,
-        capacity: dept.capacity,
-        // Provide current state of assigned students for accurate AI decision
-        assignedStudents: dept.assignedStudents.filter(rollNum => rollNum !== currentUser.rollNumber), // Exclude current student if already in a list by mistake
-      })),
-    };
-
-    try {
-      const result: AssignElectivesOutput = await assignElectives(assignmentInput);
-      const studentAssignment = result.assignments.find(a => a.rollNumber === currentUser.rollNumber);
-
-      if (studentAssignment) {
-        const assignedDeptObj = departments.find(d => d.name === studentAssignment.assignedDepartment);
-        updateUserAssignment(assignedDeptObj ? assignedDeptObj.id : null, studentAssignment.reason || null);
-        toast({
-          title: "Preferences Submitted",
-          description: studentAssignment.assignedDepartment 
-            ? `You have been assigned to ${studentAssignment.assignedDepartment}.` 
-            : "Assignment could not be made based on current preferences and availability.",
-          variant: studentAssignment.assignedDepartment ? "default" : "default", // Using accent would require theme update
-        });
-      } else {
-        toast({ title: "Assignment Error", description: "Could not retrieve assignment result.", variant: "destructive" });
-         updateUserAssignment(null, "Could not retrieve assignment result from AI.");
-      }
-    } catch (error) {
-      console.error("Error assigning electives:", error);
-      toast({ title: "Submission Failed", description: "An error occurred while submitting your preferences.", variant: "destructive" });
-      updateUserAssignment(null, "An error occurred during AI assignment.");
-    } finally {
-      setIsLoading(false);
-    }
+    setIsLoading(false);
   };
 
   if (!currentUser) return <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />;
 
+  // Case 1: Student has a final, approved assignment
   if (currentUser.assignedElective) {
     return <AssignmentResultDisplay student={currentUser} />;
   }
 
+  // Case 2: Student has submitted preferences, awaiting approval
+  if (currentUser.preferences.length > 0 && !currentUser.assignedElective) {
+    return (
+      <Card className="w-full max-w-2xl mx-auto shadow-lg bg-card">
+        <CardHeader className="items-center text-center">
+          <Clock className="h-16 w-16 text-primary mb-4" />
+          <CardTitle className="text-2xl font-headline text-primary">Preferences Submitted</CardTitle>
+          <CardDescription>
+            {currentUser.assignmentReason || "Your choices are awaiting approval from the departments."}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="text-center">
+          <p className="mb-4">Your current preferences in order of priority:</p>
+          <ol className="list-decimal list-inside space-y-1 text-left w-fit mx-auto">
+              {currentUser.preferences.map((id) => {
+                const dept = departments.find(d => d.id === id);
+                return <li key={id}>{dept?.name || 'Unknown Department'}</li>;
+              })}
+            </ol>
+          <p className="mt-6 text-sm text-muted-foreground">You will be notified once your assignment is finalized. You can resubmit your preferences until the deadline.</p>
+           <Button onClick={() => savePreferences([])} variant="outline" className="mt-4">
+            Edit Preferences
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Case 3: Student has not yet submitted any preferences
   return (
     <div className="space-y-8">
       <div>
@@ -144,9 +134,9 @@ export function ElectiveSelectionClient() {
             <p className="text-muted-foreground">No departments selected yet.</p>
           ) : (
             <ol className="list-decimal list-inside space-y-1 mb-6">
-              {selectedPreferences.map((id, index) => {
+              {selectedPreferences.map((id) => {
                 const dept = departments.find(d => d.id === id);
-                return <li key={id} className="text-foreground">{index + 1}. {dept?.name || 'Unknown Department'}</li>;
+                return <li key={id} className="text-foreground">{dept?.name || 'Unknown Department'}</li>;
               })}
             </ol>
           )}
@@ -164,7 +154,7 @@ export function ElectiveSelectionClient() {
             ) : (
               <>
                 <Send className="mr-2 h-5 w-5" />
-                Submit Preferences
+                Submit Preferences for Approval
               </>
             )}
           </Button>

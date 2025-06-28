@@ -14,9 +14,12 @@ export interface Student {
   rollNumber: string;
   password?: string; // For mock login, not stored long-term securely this way
   name: string;
+  homeDepartmentId: string;
   preferences: string[]; // Array of department IDs
   assignedElective: string | null; // Department ID or null
   assignmentReason: string | null;
+  homeDeptApproval: boolean;
+  electiveDeptApproval: boolean;
 }
 
 export interface AssignmentResult {

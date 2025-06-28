@@ -1,3 +1,4 @@
+
 import type { Department, Student } from '@/types';
 
 export const DEPARTMENTS_DATA: Department[] = [
@@ -51,10 +52,10 @@ export const DEPARTMENTS_DATA: Department[] = [
   },
 ];
 
-export const MOCK_STUDENTS: Omit<Student, 'preferences' | 'assignedElective' | 'assignmentReason'>[] = [
-  { rollNumber: 'user123', password: 'password123', name: 'Alice Smith' },
-  { rollNumber: 'user456', password: 'password456', name: 'Bob Johnson' },
-  { rollNumber: 'user789', password: 'password789', name: 'Carol Williams' },
+export const MOCK_STUDENTS: Student[] = [
+  { rollNumber: 'user123', name: 'Alice Smith', password: 'password123', homeDepartmentId: 'cs', preferences: [], assignedElective: null, assignmentReason: null, homeDeptApproval: false, electiveDeptApproval: false },
+  { rollNumber: 'user456', name: 'Bob Johnson', password: 'password456', homeDepartmentId: 'mech', preferences: [], assignedElective: null, assignmentReason: null, homeDeptApproval: false, electiveDeptApproval: false },
+  { rollNumber: 'user789', name: 'Carol Williams', password: 'password789', homeDepartmentId: 'ee', preferences: [], assignedElective: null, assignmentReason: null, homeDeptApproval: false, electiveDeptApproval: false },
 ];
 
 export const MAX_PREFERENCES = 4;
