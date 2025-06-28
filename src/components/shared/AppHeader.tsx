@@ -17,7 +17,7 @@ export function AppHeader() {
       <div className="container flex h-16 items-center justify-between">
         <Link href={homeLink} className="flex items-center gap-2">
            <CustomAcademicCapIcon size={32} className="text-primary" />
-          <h1 className="text-2xl font-bold font-headline text-primary">Elective Navigator</h1>
+          <h1 className="text-2xl font-bold font-headline text-primary">Open Elective</h1>
         </Link>
         <div className="flex items-center gap-4">
           {currentUser && (

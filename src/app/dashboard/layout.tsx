@@ -35,7 +35,7 @@ export default function DashboardLayout({
         {children}
       </main>
       <footer className="py-4 text-center text-sm text-muted-foreground border-t">
-        © {new Date().getFullYear()} Elective Navigator. All rights reserved.
+        © {new Date().getFullYear()} Open Elective. All rights reserved.
       </footer>
     </div>
   );

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import type { AuthenticatedUser } from '@/types';
 import { MOCK_STUDENTS } from '@/lib/constants';
 
-const AUTH_STORAGE_KEY = 'electiveNavigatorUser';
+const AUTH_STORAGE_KEY = 'openElectiveUser';
 
 interface UseAuthReturn {
   currentUser: AuthenticatedUser | null;

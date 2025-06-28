@@ -17,7 +17,7 @@ export function LoginTabs() {
     <Card className="w-full max-w-md shadow-xl">
       <CardHeader>
         <CardTitle className="text-3xl font-headline text-center text-primary">
-          Elective Navigator
+          Open Elective
         </CardTitle>
         <CardDescription className="text-center">
           Sign in to continue

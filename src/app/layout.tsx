@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'Elective Navigator',
+  title: 'Open Elective',
   description: 'Select your open electives seamlessly.',
 };
 
