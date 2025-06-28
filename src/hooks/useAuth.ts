@@ -37,52 +37,45 @@ export function useAuth(): UseAuthReturn {
 
   const login = async (rollNumber: string, passwordAttempt: string): Promise<boolean> => {
     setIsLoading(true);
-    
+
     const ADMIN_ROLL_NUMBER = 'department';
     const ADMIN_PASSWORD = 'adminpass';
 
-    let userToAuth: AuthenticatedUser | null = null;
+    let authenticatedUser: AuthenticatedUser | null = null;
 
     if (rollNumber === ADMIN_ROLL_NUMBER && passwordAttempt === ADMIN_PASSWORD) {
-      userToAuth = {
-        rollNumber: ADMIN_ROLL_NUMBER,
-        name: 'Department',
-        homeDepartmentId: 'department',
-        preferences: [],
-        assignedElective: null,
-        assignmentReason: null,
-        homeDeptApproval: false,
-        electiveDeptApproval: false,
-      };
+        authenticatedUser = {
+            rollNumber: ADMIN_ROLL_NUMBER,
+            name: 'Department',
+            homeDepartmentId: 'department',
+            preferences: [],
+            assignedElective: null,
+            assignmentReason: null,
+            homeDeptApproval: false,
+            electiveDeptApproval: false,
+        };
     } else {
-      // Unify student data source - check localStorage first, then mock data.
-      const allStudentsData = localStorage.getItem('allStudentsData');
-      const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : MOCK_STUDENTS;
+        const allStudentsData = localStorage.getItem('allStudentsData');
+        const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : MOCK_STUDENTS;
+        const studentData = students.find(s => s.rollNumber === rollNumber && s.password === passwordAttempt);
 
-      const studentData = students.find(
-        (s) => s.rollNumber === rollNumber && s.password === passwordAttempt
-      );
-
-      if (studentData) {
-        // Find if there's a stored version of the user to persist their preferences across logins
-        const storedUser = localStorage.getItem(AUTH_STORAGE_KEY);
-        if(storedUser && JSON.parse(storedUser).rollNumber === rollNumber) {
-          userToAuth = JSON.parse(storedUser);
-        } else {
-          const { password, ...rest } = studentData;
-          userToAuth = rest;
+        if (studentData) {
+            const { password, ...userData } = studentData;
+            authenticatedUser = userData;
         }
-      }
     }
-    
+
     setIsLoading(false);
 
-    if (userToAuth) {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userToAuth));
-      setCurrentUser(userToAuth);
-      return true;
+    if (authenticatedUser) {
+        setCurrentUser(authenticatedUser);
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authenticatedUser));
+        return true;
     }
-
+    
+    // If login fails, ensure state is clean
+    setCurrentUser(null);
+    localStorage.removeItem(AUTH_STORAGE_KEY);
     return false;
   };
 
@@ -104,6 +97,20 @@ export function useAuth(): UseAuthReturn {
         electiveDeptApproval: false,
       };
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedUser));
+
+      // Also update the master student list in localStorage for persistence
+      try {
+        const allStudentsData = localStorage.getItem('allStudentsData');
+        const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : MOCK_STUDENTS;
+        const studentIndex = students.findIndex(s => s.rollNumber === updatedUser.rollNumber);
+        if (studentIndex > -1) {
+          students[studentIndex] = { ...students[studentIndex], ...updatedUser };
+          localStorage.setItem('allStudentsData', JSON.stringify(students));
+        }
+      } catch (e) {
+        console.error("Could not update master student list", e);
+      }
+
       return updatedUser;
     });
   }, []);
