@@ -4,7 +4,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { LoginForm } from '@/components/auth/LoginForm';
+import { LoginTabs } from '@/components/auth/LoginTabs';
 import { Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
@@ -31,7 +31,7 @@ export default function LoginPage() {
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center p-6 bg-gradient-to-br from-background to-secondary">
-      <LoginForm />
+      <LoginTabs />
     </main>
   );
 }
