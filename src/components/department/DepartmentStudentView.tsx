@@ -7,6 +7,8 @@ import { MOCK_STUDENTS } from '@/lib/constants';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import { Check, Clock } from 'lucide-react';
 
 const ALL_STUDENTS_STORAGE_KEY = 'allStudentsData';
@@ -17,6 +19,7 @@ interface DepartmentStudentViewProps {
 
 export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProps) {
   const [allStudents, setAllStudents] = useState<Student[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
     try {
@@ -32,6 +35,24 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
     return allStudents.filter(student => student.homeDepartmentId === currentUser.departmentId);
   }, [allStudents, currentUser]);
 
+  const handleApproveStudent = (rollNumber: string) => {
+    const updatedStudents = allStudents.map(student => {
+      if (student.rollNumber === rollNumber) {
+        return { ...student, status: 'approved' as const };
+      }
+      return student;
+    });
+
+    setAllStudents(updatedStudents);
+    localStorage.setItem(ALL_STUDENTS_STORAGE_KEY, JSON.stringify(updatedStudents));
+
+    toast({
+      title: "Student Approved",
+      description: `Student with roll number ${rollNumber} has been approved and can now log in.`,
+    });
+  };
+
+
   if (currentUser.role !== 'department') return null;
 
   return (
@@ -39,7 +60,7 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
       <CardHeader>
         <CardTitle>Department Student Roster</CardTitle>
         <CardDescription>
-          Showing all students registered under the {currentUser.name}.
+          Approve new student registrations and view all students in the {currentUser.name}.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -53,6 +74,7 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
                 <TableHead>Name</TableHead>
                 <TableHead>Semester</TableHead>
                 <TableHead>Registration Status</TableHead>
+                <TableHead className="text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -71,6 +93,13 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
                       }
                       {studentStatus.charAt(0).toUpperCase() + studentStatus.slice(1)}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {studentStatus === 'pending' && (
+                      <Button size="sm" onClick={() => handleApproveStudent(student.rollNumber)}>
+                        Approve
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               )})}
