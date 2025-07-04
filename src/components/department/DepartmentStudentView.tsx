@@ -1,34 +1,23 @@
 
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import type { Student, AuthenticatedUser } from '@/types';
-import { MOCK_STUDENTS } from '@/lib/constants';
+import { useStudentData } from '@/hooks/useStudentData';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Check, Clock } from 'lucide-react';
-
-const ALL_STUDENTS_STORAGE_KEY = 'allStudentsData';
+import { Check, Clock, Trash2 } from 'lucide-react';
 
 interface DepartmentStudentViewProps {
   currentUser: AuthenticatedUser;
 }
 
 export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProps) {
-  const [allStudents, setAllStudents] = useState<Student[]>([]);
+  const { students: allStudents, saveStudents } = useStudentData();
   const { toast } = useToast();
-
-  useEffect(() => {
-    try {
-      const storedData = localStorage.getItem(ALL_STUDENTS_STORAGE_KEY);
-      setAllStudents(storedData ? JSON.parse(storedData) : MOCK_STUDENTS);
-    } catch {
-      setAllStudents(MOCK_STUDENTS);
-    }
-  }, []);
 
   const departmentStudents = useMemo(() => {
     if (currentUser.role !== 'department') return [];
@@ -43,8 +32,7 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
       return student;
     });
 
-    setAllStudents(updatedStudents);
-    localStorage.setItem(ALL_STUDENTS_STORAGE_KEY, JSON.stringify(updatedStudents));
+    saveStudents(updatedStudents);
 
     toast({
       title: "Student Approved",
@@ -52,6 +40,15 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
     });
   };
 
+  const handleDeleteStudent = (rollNumber: string) => {
+    const updatedStudents = allStudents.filter(student => student.rollNumber !== rollNumber);
+    saveStudents(updatedStudents);
+    toast({
+        title: "Registration Removed",
+        description: `The registration for student ${rollNumber} has been removed.`,
+        variant: "destructive"
+    });
+  };
 
   if (currentUser.role !== 'department') return null;
 
@@ -94,11 +91,16 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
                       {studentStatus.charAt(0).toUpperCase() + studentStatus.slice(1)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right space-x-2">
                     {studentStatus === 'pending' && (
-                      <Button size="sm" onClick={() => handleApproveStudent(student.rollNumber)}>
-                        Approve
-                      </Button>
+                      <>
+                        <Button size="sm" onClick={() => handleApproveStudent(student.rollNumber)}>
+                          Approve
+                        </Button>
+                        <Button variant="destructive" size="sm" onClick={() => handleDeleteStudent(student.rollNumber)}>
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
                     )}
                   </TableCell>
                 </TableRow>

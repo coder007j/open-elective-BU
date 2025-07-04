@@ -1,30 +1,19 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check, Clock } from 'lucide-react';
 import type { Student } from '@/types';
-import { MOCK_STUDENTS } from '@/lib/constants';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-
-const ALL_STUDENTS_STORAGE_KEY = 'allStudentsData';
+import { useStudentData } from '@/hooks/useStudentData';
 
 export function StudentManager() {
-  const [students, setStudents] = useState<Student[]>([]);
+  const { students, saveStudents } = useStudentData();
   const { toast } = useToast();
-
-  useEffect(() => {
-    try {
-      const storedData = localStorage.getItem(ALL_STUDENTS_STORAGE_KEY);
-      setStudents(storedData ? JSON.parse(storedData) : MOCK_STUDENTS);
-    } catch {
-      setStudents(MOCK_STUDENTS);
-    }
-  }, []);
 
   const handleApproveStudent = (rollNumber: string) => {
     const updatedStudents = students.map(student => {
@@ -34,8 +23,7 @@ export function StudentManager() {
       return student;
     });
 
-    setStudents(updatedStudents);
-    localStorage.setItem(ALL_STUDENTS_STORAGE_KEY, JSON.stringify(updatedStudents));
+    saveStudents(updatedStudents);
 
     toast({
       title: "Student Approved",
