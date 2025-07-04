@@ -1,7 +1,7 @@
 
 "use client";
 
-import { ApprovalManager } from '@/components/admin/AllocationManager';
+import { DepartmentDashboardClient } from '@/components/department/DepartmentDashboardClient';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
@@ -38,10 +38,10 @@ export default function DepartmentDashboardPage() {
           Department Dashboard
         </h1>
         <p className="text-lg text-muted-foreground">
-          Welcome, {currentUser.name}. Manage student elective approvals for your department.
+          Welcome, {currentUser.name}. Manage student elective approvals and view your student roster.
         </p>
       </div>
-      <ApprovalManager currentUser={currentUser} />
+      <DepartmentDashboardClient currentUser={currentUser} />
     </div>
   );
 }
