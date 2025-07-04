@@ -65,30 +65,32 @@ export function StudentManager() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {students.map(student => (
+              {students.map(student => {
+                const studentStatus = student.status || 'pending';
+                return (
                 <TableRow key={student.rollNumber}>
                   <TableCell className="font-medium">{student.rollNumber}</TableCell>
                   <TableCell>{student.name}</TableCell>
                   <TableCell>{student.homeDepartmentId.toUpperCase()}</TableCell>
                   <TableCell>{student.semester}</TableCell>
                   <TableCell>
-                    <Badge variant={student.status === 'approved' ? 'default' : 'secondary'}>
-                      {student.status === 'approved' ? 
+                    <Badge variant={studentStatus === 'approved' ? 'default' : 'secondary'}>
+                      {studentStatus === 'approved' ? 
                         <Check className="mr-2 h-4 w-4" /> :
                         <Clock className="mr-2 h-4 w-4" />
                       }
-                      {student.status.charAt(0).toUpperCase() + student.status.slice(1)}
+                      {studentStatus.charAt(0).toUpperCase() + studentStatus.slice(1)}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    {student.status === 'pending' && (
+                    {studentStatus === 'pending' && (
                       <Button size="sm" onClick={() => handleApproveStudent(student.rollNumber)}>
                         Approve
                       </Button>
                     )}
                   </TableCell>
                 </TableRow>
-              ))}
+              )})}
             </TableBody>
           </Table>
         )}

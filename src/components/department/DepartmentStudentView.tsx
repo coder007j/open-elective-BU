@@ -56,22 +56,24 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
               </TableRow>
             </TableHeader>
             <TableBody>
-              {departmentStudents.map(student => (
+              {departmentStudents.map(student => {
+                const studentStatus = student.status || 'pending';
+                return (
                 <TableRow key={student.rollNumber}>
                   <TableCell className="font-medium">{student.rollNumber}</TableCell>
                   <TableCell>{student.name}</TableCell>
                   <TableCell>{student.semester}</TableCell>
                   <TableCell>
-                    <Badge variant={student.status === 'approved' ? 'default' : 'secondary'}>
-                      {student.status === 'approved' ? 
+                    <Badge variant={studentStatus === 'approved' ? 'default' : 'secondary'}>
+                      {studentStatus === 'approved' ? 
                         <Check className="mr-2 h-4 w-4" /> :
                         <Clock className="mr-2 h-4 w-4" />
                       }
-                      {student.status.charAt(0).toUpperCase() + student.status.slice(1)}
+                      {studentStatus.charAt(0).toUpperCase() + studentStatus.slice(1)}
                     </Badge>
                   </TableCell>
                 </TableRow>
-              ))}
+              )})}
             </TableBody>
           </Table>
         )}
