@@ -17,7 +17,7 @@ export default function AdminDashboardPage() {
     );
   }
 
-  if (!currentUser || currentUser.rollNumber !== 'admin') {
+  if (!currentUser || currentUser.role !== 'admin') {
     return (
        <Card className="w-full max-w-lg mx-auto">
         <CardHeader>
@@ -41,7 +41,7 @@ export default function AdminDashboardPage() {
           Manage student data, departments, and approvals.
         </p>
       </div>
-      <AdminDashboardClient />
+      <AdminDashboardClient currentUser={currentUser} />
     </div>
   );
 }

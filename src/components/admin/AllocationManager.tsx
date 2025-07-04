@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
-import type { Department, Student } from '@/types';
+import type { Department, Student, AuthenticatedUser } from '@/types';
 import { DEPARTMENTS_DATA, MOCK_STUDENTS } from '@/lib/constants';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -13,11 +13,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info, ThumbsUp, CheckCircle, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-// In a real application, student data would be fetched from a database.
-// For this component, we manage the state locally.
 function useStudentData() {
     const [students, setStudents] = useState<Student[]>(() => {
-        // Attempt to load from localStorage to persist state across refreshes for the demo
         try {
             const storedData = localStorage.getItem('allStudentsData');
             return storedData ? JSON.parse(storedData) : MOCK_STUDENTS;
@@ -33,7 +30,11 @@ function useStudentData() {
     return { students, setStudents };
 }
 
-export function ApprovalManager() {
+interface ApprovalManagerProps {
+    currentUser: AuthenticatedUser;
+}
+
+export function ApprovalManager({ currentUser }: ApprovalManagerProps) {
   const { toast } = useToast();
   const { students, setStudents } = useStudentData();
   const [departments] = useState<Department[]>(DEPARTMENTS_DATA);
@@ -42,9 +43,15 @@ export function ApprovalManager() {
     new Map(departments.map(dept => [dept.id, dept.name])),
   [departments]);
 
-  const studentsWithPreferences = useMemo(() => 
-    students.filter(s => s.preferences.length > 0),
-  [students]);
+  const studentsWithPreferences = useMemo(() => {
+    const allStudentsWithPrefs = students.filter(s => s.preferences.length > 0);
+    if (currentUser.role === 'department') {
+        return allStudentsWithPrefs.filter(s => 
+            s.homeDepartmentId === currentUser.departmentId || s.preferences[0] === currentUser.departmentId
+        );
+    }
+    return allStudentsWithPrefs;
+  }, [students, currentUser]);
 
   const handleApproval = (rollNumber: string, approvalType: 'home' | 'elective') => {
     setStudents(prevStudents => {
@@ -58,12 +65,10 @@ export function ApprovalManager() {
             updatedStudent.electiveDeptApproval = true;
           }
 
-          // Check for final assignment
-          if (updatedStudent.homeDeptApproval && updatedStudent.electiveDeptApproval && updatedStudent.preferences.length > 0) {
+          if (updatedStudent.homeDeptApproval && updatedStudent.electiveDeptApproval) {
             const chosenElectiveId = updatedStudent.preferences[0];
             const chosenElective = departments.find(d => d.id === chosenElectiveId);
             
-            // Basic check if department has capacity. In a real app, this needs to be more robust.
             if (chosenElective && chosenElective.assignedStudents.length < chosenElective.capacity) {
                 updatedStudent.assignedElective = chosenElectiveId;
                 updatedStudent.assignmentReason = `Approved and assigned to ${chosenElective.name}.`;
@@ -87,6 +92,15 @@ export function ApprovalManager() {
       return newStudents;
     });
   };
+
+  const canApprove = (student: Student, type: 'home' | 'elective'): boolean => {
+      if (currentUser.role === 'admin') return true;
+      if (currentUser.role === 'department') {
+          if (type === 'home') return student.homeDepartmentId === currentUser.departmentId;
+          if (type === 'elective') return student.preferences[0] === currentUser.departmentId;
+      }
+      return false;
+  }
 
   return (
     <Card>
@@ -145,13 +159,13 @@ export function ApprovalManager() {
                                 </TableCell>
                                 <TableCell className="space-x-2 text-center">
                                    {!student.homeDeptApproval && (
-                                        <Button size="sm" onClick={() => handleApproval(student.rollNumber, 'home')} disabled={!!student.assignedElective}>
+                                        <Button size="sm" onClick={() => handleApproval(student.rollNumber, 'home')} disabled={!!student.assignedElective || !canApprove(student, 'home')}>
                                             <ThumbsUp className="h-4 w-4 mr-2" />
                                             Approve (Home)
                                         </Button>
                                    )}
                                    {!student.electiveDeptApproval && (
-                                        <Button size="sm" onClick={() => handleApproval(student.rollNumber, 'elective')} disabled={!!student.assignedElective}>
+                                        <Button size="sm" onClick={() => handleApproval(student.rollNumber, 'elective')} disabled={!!student.assignedElective || !canApprove(student, 'elective')}>
                                             <ThumbsUp className="h-4 w-4 mr-2" />
                                             Approve (Elective)
                                         </Button>

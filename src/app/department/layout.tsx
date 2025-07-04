@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { AppHeader } from '@/components/shared/AppHeader';
 import { Loader2 } from 'lucide-react';
 
-export default function AdminDashboardLayout({
+export default function DepartmentDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -17,13 +17,13 @@ export default function AdminDashboardLayout({
 
   useEffect(() => {
     if (!isLoading) {
-      if (!currentUser || currentUser.role !== 'admin') {
-        router.replace('/'); // Redirect if not admin or not authenticated
+      if (!currentUser || currentUser.role !== 'department') {
+        router.replace('/'); // Redirect if not a department user or not authenticated
       }
     }
   }, [currentUser, isLoading, router]);
 
-  if (isLoading || !currentUser || currentUser.role !== 'admin') {
+  if (isLoading || !currentUser || currentUser.role !== 'department') {
     return (
       <div className="flex flex-1 items-center justify-center min-h-screen bg-background">
          <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -38,7 +38,7 @@ export default function AdminDashboardLayout({
         {children}
       </main>
       <footer className="py-4 text-center text-sm text-muted-foreground border-t">
-        © {new Date().getFullYear()} Open Elective - Admin Panel.
+        © {new Date().getFullYear()} Open Elective - Department Panel.
       </footer>
     </div>
   );

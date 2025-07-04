@@ -1,5 +1,5 @@
 
-import type { Department, Student } from '@/types';
+import type { Department, Student, DepartmentUser } from '@/types';
 
 export const DEPARTMENTS_DATA: Department[] = [
   { 
@@ -57,5 +57,15 @@ export const MOCK_STUDENTS: Student[] = [
   { rollNumber: 'user456', name: 'Bob Johnson', password: 'password456', homeDepartmentId: 'mech', semester: 3, status: 'approved', preferences: [], assignedElective: null, assignmentReason: null, homeDeptApproval: false, electiveDeptApproval: false },
   { rollNumber: 'user789', name: 'Carol Williams', password: 'password789', homeDepartmentId: 'ee', semester: 7, status: 'pending', preferences: [], assignedElective: null, assignmentReason: null, homeDeptApproval: false, electiveDeptApproval: false },
 ];
+
+export const MOCK_DEPARTMENT_USERS: DepartmentUser[] = [
+  { id: 'cs', password: 'password', name: 'CS Department Head', departmentId: 'cs' },
+  { id: 'mech', password: 'password', name: 'Mech Department Head', departmentId: 'mech' },
+  { id: 'ee', password: 'password', name: 'EE Department Head', departmentId: 'ee' },
+  { id: 'civil', password: 'password', name: 'Civil Department Head', departmentId: 'civil' },
+  { id: 'biotech', password: 'password', name: 'Biotech Department Head', departmentId: 'biotech' },
+  { id: 'hum', password: 'password', name: 'Humanities Dept Head', departmentId: 'hum' },
+];
+
 
 export const MAX_PREFERENCES = 4;

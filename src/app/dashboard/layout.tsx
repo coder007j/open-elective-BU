@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect } from 'react';
@@ -15,12 +16,14 @@ export default function DashboardLayout({
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !currentUser) {
-      router.replace('/'); // Redirect to login if not authenticated
+    if (!isLoading) {
+      if (!currentUser || currentUser.role !== 'student') {
+        router.replace('/'); // Redirect if not student or not authenticated
+      }
     }
   }, [currentUser, isLoading, router]);
 
-  if (isLoading || !currentUser) {
+  if (isLoading || !currentUser || currentUser.role !== 'student') {
     return (
       <div className="flex flex-1 items-center justify-center min-h-screen bg-background">
          <Loader2 className="h-12 w-12 animate-spin text-primary" />

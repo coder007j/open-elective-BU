@@ -7,8 +7,13 @@ import { ApprovalManager } from './AllocationManager';
 import { StudentManager } from './StudentManager';
 import { DepartmentManager } from './DepartmentManager';
 import { CheckSquare, Users, Building } from 'lucide-react';
+import type { AuthenticatedUser } from '@/types';
 
-export function AdminDashboardClient() {
+interface AdminDashboardClientProps {
+  currentUser: AuthenticatedUser;
+}
+
+export function AdminDashboardClient({ currentUser }: AdminDashboardClientProps) {
   return (
     <Tabs defaultValue="approvals" className="w-full">
       <TabsList className="grid w-full grid-cols-3">
@@ -26,7 +31,7 @@ export function AdminDashboardClient() {
         </TabsTrigger>
       </TabsList>
       <TabsContent value="approvals" className="pt-6">
-        <ApprovalManager />
+        <ApprovalManager currentUser={currentUser} />
       </TabsContent>
       <TabsContent value="students" className="pt-6">
         <StudentManager />

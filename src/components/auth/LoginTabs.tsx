@@ -11,11 +11,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginForm } from "./LoginForm";
 import { RegistrationForm } from "./RegistrationForm";
-import { User, Shield, UserPlus } from "lucide-react";
+import { User, Shield, UserPlus, Building } from "lucide-react";
 
 export function LoginTabs() {
   return (
-    <Card className="w-full max-w-md shadow-xl">
+    <Card className="w-full max-w-lg shadow-xl">
       <CardHeader>
         <CardTitle className="text-3xl font-headline text-center text-primary">
           Open Elective
@@ -26,14 +26,18 @@ export function LoginTabs() {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="student" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="student">
               <User className="mr-2 h-4 w-4" />
-              Student Login
+              Student
             </TabsTrigger>
-            <TabsTrigger value="admin">
+            <TabsTrigger value="department">
+              <Building className="mr-2 h-4 w-4" />
+              Department
+            </TabsTrigger>
+             <TabsTrigger value="admin">
               <Shield className="mr-2 h-4 w-4" />
-              Admin Login
+              Admin
             </TabsTrigger>
             <TabsTrigger value="register">
               <UserPlus className="mr-2 h-4 w-4" />
@@ -43,6 +47,12 @@ export function LoginTabs() {
           <TabsContent value="student" className="pt-4">
             <p className="text-sm text-center text-muted-foreground mb-4">
               Enter your student credentials to select your electives.
+            </p>
+            <LoginForm />
+          </TabsContent>
+           <TabsContent value="department" className="pt-4">
+            <p className="text-sm text-center text-muted-foreground mb-4">
+              Enter department credentials to manage student approvals.
             </p>
             <LoginForm />
           </TabsContent>

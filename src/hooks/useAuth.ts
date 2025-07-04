@@ -3,8 +3,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import type { AuthenticatedUser, Student } from '@/types';
-import { MOCK_STUDENTS } from '@/lib/constants';
+import type { AuthenticatedUser, Student, DepartmentUser } from '@/types';
+import { MOCK_STUDENTS, MOCK_DEPARTMENT_USERS } from '@/lib/constants';
 
 const AUTH_STORAGE_KEY = 'openElectiveUser';
 const ALL_STUDENTS_STORAGE_KEY = 'allStudentsData';
@@ -49,23 +49,40 @@ export function useAuth(): UseAuthReturn {
   const login = useCallback(async (rollNumber: string, passwordAttempt: string) => {
     
     // Admin Login
-    if (rollNumber === 'admin' && passwordAttempt === 'adminpass') {
-      const adminUser: AuthenticatedUser = {
-        rollNumber: 'admin',
-        name: 'Admin',
-        homeDepartmentId: 'admin',
-        semester: 0,
-        status: 'approved',
-        preferences: [],
-        assignedElective: null,
-        assignmentReason: null,
-        homeDeptApproval: false,
-        electiveDeptApproval: false,
-      };
-      setCurrentUser(adminUser);
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(adminUser));
-      router.replace('/admin/dashboard');
-      return;
+    if (rollNumber === 'admin') {
+      if (passwordAttempt === 'adminpass') {
+        const adminUser: AuthenticatedUser = {
+          rollNumber: 'admin',
+          name: 'Admin',
+          role: 'admin',
+        };
+        setCurrentUser(adminUser);
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(adminUser));
+        router.replace('/admin/dashboard');
+        return;
+      } else {
+         throw new Error("Invalid credentials. Please check and try again.");
+      }
+    }
+
+    // Department Login
+    const deptUserToAuth = MOCK_DEPARTMENT_USERS.find(d => d.id === rollNumber);
+    if (deptUserToAuth) {
+      if (deptUserToAuth.password === passwordAttempt) {
+        const { password, ...deptData } = deptUserToAuth;
+        const departmentUser: AuthenticatedUser = {
+          rollNumber: deptData.id,
+          name: deptData.name,
+          departmentId: deptData.departmentId,
+          role: 'department',
+        };
+        setCurrentUser(departmentUser);
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(departmentUser));
+        router.replace('/department/dashboard');
+        return;
+      } else {
+        throw new Error("Invalid credentials. Please check and try again.");
+      }
     }
 
     // Student Login
@@ -73,20 +90,27 @@ export function useAuth(): UseAuthReturn {
     const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : MOCK_STUDENTS;
     const userToAuth = students.find(s => s.rollNumber === rollNumber);
 
-    if (!userToAuth) {
-      throw new Error("Invalid credentials. Please check and try again.");
+    if (userToAuth) {
+      if (userToAuth.password !== passwordAttempt) {
+        throw new Error("Invalid credentials. Please check and try again.");
+      }
+      if (userToAuth.status !== 'approved') {
+        throw new Error("Your registration is still pending approval. Please check back later.");
+      }
+      
+      const { password, ...userData } = userToAuth;
+      const studentUser: AuthenticatedUser = {
+        ...userData,
+        role: 'student',
+      };
+      setCurrentUser(studentUser);
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(studentUser));
+      router.replace('/dashboard');
+      return;
     }
-    if (userToAuth.password !== passwordAttempt) {
-      throw new Error("Invalid credentials. Please check and try again.");
-    }
-    if (userToAuth.status !== 'approved') {
-      throw new Error("Your registration is still pending approval. Please check back later.");
-    }
-    
-    const { password, ...userData } = userToAuth;
-    setCurrentUser(userData);
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
-    router.replace('/dashboard');
+
+    // If no user found
+    throw new Error("Invalid credentials. Please check and try again.");
 
   }, [router]);
 
@@ -127,7 +151,8 @@ export function useAuth(): UseAuthReturn {
 
   const savePreferences = useCallback((preferences: string[]) => {
     setCurrentUser(prevUser => {
-      if (!prevUser) return null;
+      if (!prevUser || prevUser.role !== 'student') return prevUser;
+      
       const updatedUser: AuthenticatedUser = {
         ...prevUser,
         preferences: preferences,
@@ -143,7 +168,16 @@ export function useAuth(): UseAuthReturn {
         const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : MOCK_STUDENTS;
         const studentIndex = students.findIndex(s => s.rollNumber === updatedUser.rollNumber);
         if (studentIndex > -1) {
-          students[studentIndex] = { ...students[studentIndex], ...updatedUser };
+          // Can't spread AuthenticatedUser into Student, so map fields manually
+          const studentToSave: Student = {
+            ...students[studentIndex],
+            preferences: updatedUser.preferences,
+            assignedElective: updatedUser.assignedElective,
+            assignmentReason: updatedUser.assignmentReason,
+            homeDeptApproval: updatedUser.homeDeptApproval,
+            electiveDeptApproval: updatedUser.electiveDeptApproval,
+          };
+          students[studentIndex] = studentToSave;
           localStorage.setItem(ALL_STUDENTS_STORAGE_KEY, JSON.stringify(students));
         }
       } catch (e) {
@@ -156,8 +190,8 @@ export function useAuth(): UseAuthReturn {
 
   const updateUserAssignment = useCallback((assignedElectiveId: string | null, reason: string | null) => {
     setCurrentUser(prevUser => {
-      if (!prevUser) return null;
-      const updatedUser = {
+      if (!prevUser || prevUser.role !== 'student') return prevUser;
+      const updatedUser: AuthenticatedUser = {
         ...prevUser,
         assignedElective: assignedElectiveId,
         assignmentReason: reason,

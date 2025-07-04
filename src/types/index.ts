@@ -24,11 +24,31 @@ export interface Student {
   electiveDeptApproval: boolean;
 }
 
+export interface DepartmentUser {
+  id: string;
+  password?: string;
+  name: string;
+  departmentId: string;
+}
+
+
 export interface AssignmentResult {
   rollNumber: string;
   assignedDepartment: string | null; // Department name
   reason: string | null;
 }
 
-// Helper type for useAuth hook
-export type AuthenticatedUser = Omit<Student, 'password'>;
+// The user object stored in the auth session
+export type AuthenticatedUser = 
+  | (Omit<Student, 'password'> & { role: 'student' })
+  | {
+      rollNumber: 'admin';
+      role: 'admin';
+      name: 'Admin';
+    }
+  | {
+      rollNumber: string; // The department ID, e.g., 'cs'
+      role: 'department';
+      name: string;
+      departmentId: string; // The department this user manages
+    };

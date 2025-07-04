@@ -1,12 +1,12 @@
 
 "use client";
 
-import { ElectiveSelectionClient } from '@/components/dashboard/ElectiveSelectionClient';
+import { ApprovalManager } from '@/components/admin/AllocationManager';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 
-export default function DashboardPage() {
+export default function DepartmentDashboardPage() {
   const { currentUser, isLoading } = useAuth();
 
   if (isLoading) {
@@ -17,12 +17,12 @@ export default function DashboardPage() {
     );
   }
 
-  if (!currentUser || currentUser.role !== 'student') {
+  if (!currentUser || currentUser.role !== 'department') {
     return (
        <Card className="w-full max-w-lg mx-auto">
         <CardHeader>
           <CardTitle>Access Denied</CardTitle>
-          <CardDescription>Please log in to access the dashboard.</CardDescription>
+          <CardDescription>You do not have permission to view this page.</CardDescription>
         </CardHeader>
         <CardContent>
           <p>Redirecting to login...</p>
@@ -35,13 +35,13 @@ export default function DashboardPage() {
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8 p-6 bg-card rounded-xl shadow-lg">
         <h1 className="text-4xl font-bold font-headline text-primary mb-2">
-          Welcome, {currentUser.name}!
+          Department Dashboard
         </h1>
         <p className="text-lg text-muted-foreground">
-          Manage your elective selections here.
+          Welcome, {currentUser.name}. Manage student elective approvals for your department.
         </p>
       </div>
-      <ElectiveSelectionClient />
+      <ApprovalManager currentUser={currentUser} />
     </div>
   );
 }
