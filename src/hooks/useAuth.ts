@@ -48,11 +48,11 @@ export function useAuth(): UseAuthReturn {
 
   const login = useCallback(async (rollNumber: string, passwordAttempt: string) => {
     
-    // Department Login
-    if (rollNumber === 'department' && passwordAttempt === 'adminpass') {
+    // Admin Login
+    if (rollNumber === 'admin' && passwordAttempt === 'adminpass') {
       const adminUser: AuthenticatedUser = {
-        rollNumber: 'department',
-        name: 'Department',
+        rollNumber: 'admin',
+        name: 'Admin',
         homeDepartmentId: 'admin',
         semester: 0,
         status: 'approved',

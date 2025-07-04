@@ -31,9 +31,9 @@ export function LoginTabs() {
               <User className="mr-2 h-4 w-4" />
               Student Login
             </TabsTrigger>
-            <TabsTrigger value="department">
+            <TabsTrigger value="admin">
               <Shield className="mr-2 h-4 w-4" />
-              Department
+              Admin Login
             </TabsTrigger>
             <TabsTrigger value="register">
               <UserPlus className="mr-2 h-4 w-4" />
@@ -46,15 +46,15 @@ export function LoginTabs() {
             </p>
             <LoginForm />
           </TabsContent>
-          <TabsContent value="department" className="pt-4">
+          <TabsContent value="admin" className="pt-4">
             <p className="text-sm text-center text-muted-foreground mb-4">
-              Enter department credentials to manage departments and students.
+              Enter admin credentials to manage the application.
             </p>
             <LoginForm />
           </TabsContent>
           <TabsContent value="register" className="pt-4">
              <p className="text-sm text-center text-muted-foreground mb-4">
-              New students must register here. Your account will require department approval before you can log in.
+              New students must register here. Your account will require admin approval before you can log in.
             </p>
             <RegistrationForm />
           </TabsContent>

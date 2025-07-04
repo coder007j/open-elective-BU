@@ -15,7 +15,7 @@ export default function LoginPage() {
   // when they visit the page. The login form itself now triggers the redirect.
   useEffect(() => {
     if (!isLoading && currentUser) {
-      if (currentUser.rollNumber === 'department') {
+      if (currentUser.rollNumber === 'admin') {
         router.replace('/admin/dashboard');
       } else {
         router.replace('/dashboard');

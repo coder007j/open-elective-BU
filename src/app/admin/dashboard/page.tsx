@@ -17,7 +17,7 @@ export default function AdminDashboardPage() {
     );
   }
 
-  if (!currentUser || currentUser.rollNumber !== 'department') {
+  if (!currentUser || currentUser.rollNumber !== 'admin') {
     return (
        <Card className="w-full max-w-lg mx-auto">
         <CardHeader>
@@ -35,10 +35,10 @@ export default function AdminDashboardPage() {
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8 p-6 bg-card rounded-xl shadow-lg">
         <h1 className="text-4xl font-bold font-headline text-primary mb-2">
-          Department Dashboard
+          Admin Dashboard
         </h1>
         <p className="text-lg text-muted-foreground">
-          Manage student data and department configurations.
+          Manage student data, departments, and approvals.
         </p>
       </div>
       <AdminDashboardClient />

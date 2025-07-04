@@ -17,13 +17,13 @@ export default function AdminDashboardLayout({
 
   useEffect(() => {
     if (!isLoading) {
-      if (!currentUser || currentUser.rollNumber !== 'department') {
+      if (!currentUser || currentUser.rollNumber !== 'admin') {
         router.replace('/'); // Redirect to login if not admin or not authenticated
       }
     }
   }, [currentUser, isLoading, router]);
 
-  if (isLoading || !currentUser || currentUser.rollNumber !== 'department') {
+  if (isLoading || !currentUser || currentUser.rollNumber !== 'admin') {
     return (
       <div className="flex flex-1 items-center justify-center min-h-screen bg-background">
          <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -38,7 +38,7 @@ export default function AdminDashboardLayout({
         {children}
       </main>
       <footer className="py-4 text-center text-sm text-muted-foreground border-t">
-        © {new Date().getFullYear()} Open Elective - Department Panel.
+        © {new Date().getFullYear()} Open Elective - Admin Panel.
       </footer>
     </div>
   );
