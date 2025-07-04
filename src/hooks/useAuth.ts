@@ -7,12 +7,17 @@ import type { AuthenticatedUser, Student } from '@/types';
 import { MOCK_STUDENTS } from '@/lib/constants';
 
 const AUTH_STORAGE_KEY = 'openElectiveUser';
+const ALL_STUDENTS_STORAGE_KEY = 'allStudentsData';
+
+type RegistrationData = Omit<Student, 'preferences' | 'assignedElective' | 'assignmentReason' | 'status' | 'homeDeptApproval' | 'electiveDeptApproval'>;
+
 
 interface UseAuthReturn {
   currentUser: AuthenticatedUser | null;
   isLoading: boolean;
-  login: (rollNumber: string, passwordAttempt: string) => Promise<string | null>; // Changed return type
+  login: (rollNumber: string, passwordAttempt: string) => Promise<void>;
   logout: () => void;
+  register: (data: RegistrationData) => Promise<{ success: boolean; message: string; }>;
   savePreferences: (preferences: string[]) => void;
   updateUserAssignment: (assignedElectiveId: string | null, reason: string | null) => void;
 }
@@ -28,6 +33,12 @@ export function useAuth(): UseAuthReturn {
       if (storedUser) {
         setCurrentUser(JSON.parse(storedUser));
       }
+      
+      const allStudents = localStorage.getItem(ALL_STUDENTS_STORAGE_KEY);
+      if (!allStudents) {
+         localStorage.setItem(ALL_STUDENTS_STORAGE_KEY, JSON.stringify(MOCK_STUDENTS));
+      }
+
     } catch (error) {
       console.error("Failed to load user from localStorage", error);
       localStorage.removeItem(AUTH_STORAGE_KEY);
@@ -35,44 +46,48 @@ export function useAuth(): UseAuthReturn {
     setIsLoading(false);
   }, []);
 
-  const login = useCallback(async (rollNumber: string, passwordAttempt: string): Promise<string | null> => {
-    const allStudentsData = localStorage.getItem('allStudentsData');
-    const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : MOCK_STUDENTS;
-
-    let userToAuth: Student | null = null;
-    let isAdmin = false;
-
+  const login = useCallback(async (rollNumber: string, passwordAttempt: string) => {
+    
+    // Department Login
     if (rollNumber === 'department' && passwordAttempt === 'adminpass') {
-      isAdmin = true;
-      userToAuth = {
+      const adminUser: AuthenticatedUser = {
         rollNumber: 'department',
         name: 'Department',
-        password: 'adminpass',
         homeDepartmentId: 'admin',
+        semester: 0,
+        status: 'approved',
         preferences: [],
         assignedElective: null,
         assignmentReason: null,
         homeDeptApproval: false,
         electiveDeptApproval: false,
       };
-    } else {
-      userToAuth = students.find(s => s.rollNumber === rollNumber && s.password === passwordAttempt) || null;
+      setCurrentUser(adminUser);
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(adminUser));
+      router.replace('/admin/dashboard');
+      return;
+    }
+
+    // Student Login
+    const allStudentsData = localStorage.getItem(ALL_STUDENTS_STORAGE_KEY);
+    const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : MOCK_STUDENTS;
+    const userToAuth = students.find(s => s.rollNumber === rollNumber);
+
+    if (!userToAuth) {
+      throw new Error("Invalid credentials. Please check and try again.");
+    }
+    if (userToAuth.password !== passwordAttempt) {
+      throw new Error("Invalid credentials. Please check and try again.");
+    }
+    if (userToAuth.status !== 'approved') {
+      throw new Error("Your registration is still pending approval. Please check back later.");
     }
     
-    if (userToAuth) {
-      const { password, ...userData } = userToAuth;
-      setCurrentUser(userData);
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
-      
-      if (isAdmin) {
-        router.replace('/admin/dashboard');
-      } else {
-        router.replace('/dashboard');
-      }
-      return null; // Success
-    }
-    
-    return "Invalid credentials. Please check and try again."; // Failure
+    const { password, ...userData } = userToAuth;
+    setCurrentUser(userData);
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
+    router.replace('/dashboard');
+
   }, [router]);
 
   const logout = useCallback(() => {
@@ -81,6 +96,35 @@ export function useAuth(): UseAuthReturn {
     router.push('/'); 
   }, [router]);
   
+  const register = async (data: RegistrationData): Promise<{ success: boolean; message: string; }> => {
+    try {
+        const allStudentsData = localStorage.getItem(ALL_STUDENTS_STORAGE_KEY);
+        const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : MOCK_STUDENTS;
+
+        if (students.some(s => s.rollNumber === data.rollNumber)) {
+            return { success: false, message: 'A student with this roll number is already registered.' };
+        }
+
+        const newStudent: Student = {
+            ...data,
+            status: 'pending',
+            preferences: [],
+            assignedElective: null,
+            assignmentReason: null,
+            homeDeptApproval: false,
+            electiveDeptApproval: false,
+        };
+        
+        students.push(newStudent);
+        localStorage.setItem(ALL_STUDENTS_STORAGE_KEY, JSON.stringify(students));
+        
+        return { success: true, message: 'Registration successful. Awaiting approval.' };
+    } catch (e) {
+        const message = e instanceof Error ? e.message : "An unknown error occurred.";
+        return { success: false, message };
+    }
+  };
+
   const savePreferences = useCallback((preferences: string[]) => {
     setCurrentUser(prevUser => {
       if (!prevUser) return null;
@@ -95,12 +139,12 @@ export function useAuth(): UseAuthReturn {
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedUser));
 
       try {
-        const allStudentsData = localStorage.getItem('allStudentsData');
+        const allStudentsData = localStorage.getItem(ALL_STUDENTS_STORAGE_KEY);
         const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : MOCK_STUDENTS;
         const studentIndex = students.findIndex(s => s.rollNumber === updatedUser.rollNumber);
         if (studentIndex > -1) {
           students[studentIndex] = { ...students[studentIndex], ...updatedUser };
-          localStorage.setItem('allStudentsData', JSON.stringify(students));
+          localStorage.setItem(ALL_STUDENTS_STORAGE_KEY, JSON.stringify(students));
         }
       } catch (e) {
         console.error("Could not update master student list", e);
@@ -123,5 +167,5 @@ export function useAuth(): UseAuthReturn {
     });
   }, []);
 
-  return { currentUser, isLoading, login, logout, savePreferences, updateUserAssignment };
+  return { currentUser, isLoading, login, logout, register, savePreferences, updateUserAssignment };
 }

@@ -15,6 +15,8 @@ export interface Student {
   password?: string; // For mock login, not stored long-term securely this way
   name: string;
   homeDepartmentId: string;
+  semester: number;
+  status: 'pending' | 'approved';
   preferences: string[]; // Array of department IDs
   assignedElective: string | null; // Department ID or null
   assignmentReason: string | null;

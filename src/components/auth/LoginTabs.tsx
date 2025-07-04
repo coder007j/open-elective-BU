@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginForm } from "./LoginForm";
-import { User, Shield } from "lucide-react";
+import { RegistrationForm } from "./RegistrationForm";
+import { User, Shield, UserPlus } from "lucide-react";
 
 export function LoginTabs() {
   return (
@@ -20,19 +21,23 @@ export function LoginTabs() {
           Open Elective
         </CardTitle>
         <CardDescription className="text-center">
-          Sign in to continue
+          Sign in or register to continue
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="student" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="student">
               <User className="mr-2 h-4 w-4" />
-              Student
+              Student Login
             </TabsTrigger>
-            <TabsTrigger value="admin">
+            <TabsTrigger value="department">
               <Shield className="mr-2 h-4 w-4" />
               Department
+            </TabsTrigger>
+            <TabsTrigger value="register">
+              <UserPlus className="mr-2 h-4 w-4" />
+              Register
             </TabsTrigger>
           </TabsList>
           <TabsContent value="student" className="pt-4">
@@ -41,11 +46,17 @@ export function LoginTabs() {
             </p>
             <LoginForm />
           </TabsContent>
-          <TabsContent value="admin" className="pt-4">
+          <TabsContent value="department" className="pt-4">
             <p className="text-sm text-center text-muted-foreground mb-4">
               Enter department credentials to manage departments and students.
             </p>
             <LoginForm />
+          </TabsContent>
+          <TabsContent value="register" className="pt-4">
+             <p className="text-sm text-center text-muted-foreground mb-4">
+              New students must register here. Your account will require department approval before you can log in.
+            </p>
+            <RegistrationForm />
           </TabsContent>
         </Tabs>
       </CardContent>

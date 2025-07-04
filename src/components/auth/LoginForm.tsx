@@ -41,14 +41,16 @@ export function LoginForm() {
 
   async function onSubmit(values: LoginFormValues) {
     setIsLoading(true);
-    const errorMessage = await login(values.rollNumber, values.password);
-    
-    // Only set loading to false if login fails, otherwise we are redirecting
-    if (errorMessage) {
-      setIsLoading(false);
-      toast({
+    try {
+      await login(values.rollNumber, values.password);
+      // On success, the login function handles redirection, so we don't need to do anything here.
+      // We might not even get here if the redirect is fast enough.
+    } catch (error) {
+       setIsLoading(false);
+       const message = error instanceof Error ? error.message : "An unknown error occurred.";
+       toast({
         title: "Login Failed",
-        description: errorMessage,
+        description: message,
         variant: "destructive",
       });
     }
