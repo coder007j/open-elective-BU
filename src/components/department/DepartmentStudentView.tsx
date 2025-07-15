@@ -70,6 +70,7 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
                 <TableHead>Roll Number</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Semester</TableHead>
+                <TableHead>Last %</TableHead>
                 <TableHead>Registration Status</TableHead>
                 <TableHead className="text-right">Action</TableHead>
               </TableRow>
@@ -82,6 +83,7 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
                   <TableCell className="font-medium">{student.rollNumber}</TableCell>
                   <TableCell>{student.name}</TableCell>
                   <TableCell>{student.semester}</TableCell>
+                  <TableCell>{student.lastSemesterPercentage?.toFixed(1)}%</TableCell>
                   <TableCell>
                     <Badge variant={studentStatus === 'approved' ? 'default' : 'secondary'}>
                       {studentStatus === 'approved' ? 

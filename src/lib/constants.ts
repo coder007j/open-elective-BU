@@ -53,9 +53,9 @@ export const DEPARTMENTS_DATA: Department[] = [
 ];
 
 export const MOCK_STUDENTS: Student[] = [
-  { rollNumber: 'user123', name: 'Alice Smith', password: 'password123', homeDepartmentId: 'cs', semester: 5, status: 'approved', preferences: [], assignedElective: null, assignmentReason: null, homeDeptApproval: false, electiveDeptApproval: false },
-  { rollNumber: 'user456', name: 'Bob Johnson', password: 'password456', homeDepartmentId: 'mech', semester: 3, status: 'approved', preferences: [], assignedElective: null, assignmentReason: null, homeDeptApproval: false, electiveDeptApproval: false },
-  { rollNumber: 'user789', name: 'Carol Williams', password: 'password789', homeDepartmentId: 'ee', semester: 7, status: 'pending', preferences: [], assignedElective: null, assignmentReason: null, homeDeptApproval: false, electiveDeptApproval: false },
+  { rollNumber: 'user123', name: 'Alice Smith', password: 'password123', homeDepartmentId: 'cs', semester: 5, lastSemesterPercentage: 88.5, status: 'approved', preferences: [], assignedElective: null, assignmentReason: null, homeDeptApproval: false, electiveDeptApproval: false },
+  { rollNumber: 'user456', name: 'Bob Johnson', password: 'password456', homeDepartmentId: 'mech', semester: 3, lastSemesterPercentage: 76.0, status: 'approved', preferences: [], assignedElective: null, assignmentReason: null, homeDeptApproval: false, electiveDeptApproval: false },
+  { rollNumber: 'user789', name: 'Carol Williams', password: 'password789', homeDepartmentId: 'ee', semester: 7, lastSemesterPercentage: 91.2, status: 'pending', preferences: [], assignedElective: null, assignmentReason: null, homeDeptApproval: false, electiveDeptApproval: false },
 ];
 
 export const MOCK_DEPARTMENT_USERS: DepartmentUser[] = [

@@ -16,6 +16,7 @@ export interface Student {
   name: string;
   homeDepartmentId: string;
   semester: number;
+  lastSemesterPercentage: number;
   status: 'pending' | 'approved';
   preferences: string[]; // Array of department IDs
   assignedElective: string | null; // Department ID or null
@@ -52,3 +53,4 @@ export type AuthenticatedUser =
       name: string;
       departmentId: string; // The department this user manages
     };
+

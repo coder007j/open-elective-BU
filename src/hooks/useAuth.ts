@@ -15,7 +15,7 @@ type RegistrationData = Omit<Student, 'preferences' | 'assignedElective' | 'assi
 interface UseAuthReturn {
   currentUser: AuthenticatedUser | null;
   isLoading: boolean;
-  login: (rollNumber: string, passwordAttempt: string) => Promise<void>;
+  login: (rollNumber: string, passwordAttempt: string) => void;
   logout: () => void;
   register: (data: RegistrationData) => Promise<{ success: boolean; message: string; }>;
   savePreferences: (preferences: string[]) => void;
@@ -49,53 +49,38 @@ export function useAuth(): UseAuthReturn {
   const login = useCallback(async (rollNumber: string, passwordAttempt: string) => {
     
     // Admin Login
-    if (rollNumber === 'admin') {
-      if (passwordAttempt === 'adminpass') {
-        const adminUser: AuthenticatedUser = {
-          rollNumber: 'admin',
-          name: 'Admin',
-          role: 'admin',
-        };
-        setCurrentUser(adminUser);
+    if (rollNumber === 'admin' && passwordAttempt === 'adminpass') {
+        const adminUser: AuthenticatedUser = { rollNumber: 'admin', name: 'Admin', role: 'admin' };
         localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(adminUser));
+        setCurrentUser(adminUser);
         router.replace('/admin/dashboard');
         return;
-      } else {
-         throw new Error("Invalid credentials. Please check and try again.");
-      }
     }
 
     // Department Login
     const deptUserToAuth = MOCK_DEPARTMENT_USERS.find(d => d.id === rollNumber);
-    if (deptUserToAuth) {
-      if (deptUserToAuth.password === passwordAttempt) {
+    if (deptUserToAuth && deptUserToAuth.password === passwordAttempt) {
         const { password, ...deptData } = deptUserToAuth;
         const departmentUser: AuthenticatedUser = {
-          rollNumber: deptData.id,
-          name: deptData.name,
-          departmentId: deptData.departmentId,
-          role: 'department',
+            rollNumber: deptData.id,
+            name: deptData.name,
+            departmentId: deptData.departmentId,
+            role: 'department',
         };
-        setCurrentUser(departmentUser);
         localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(departmentUser));
+        setCurrentUser(departmentUser);
         router.replace('/department/dashboard');
         return;
-      } else {
-        throw new Error("Invalid credentials. Please check and try again.");
-      }
     }
 
     // Student Login
     const allStudentsData = localStorage.getItem(ALL_STUDENTS_STORAGE_KEY);
-    const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : MOCK_STUDENTS;
+    const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : [];
     const userToAuth = students.find(s => s.rollNumber === rollNumber);
 
-    if (userToAuth) {
-      if (userToAuth.password !== passwordAttempt) {
-        throw new Error("Invalid credentials. Please check and try again.");
-      }
+    if (userToAuth && userToAuth.password === passwordAttempt) {
       if (userToAuth.status !== 'approved') {
-        throw new Error("Your registration is still pending approval. Please check back later.");
+        throw new Error("Your registration is still pending approval.");
       }
       
       const { password, ...userData } = userToAuth;
@@ -103,15 +88,13 @@ export function useAuth(): UseAuthReturn {
         ...userData,
         role: 'student',
       };
-      setCurrentUser(studentUser);
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(studentUser));
+      setCurrentUser(studentUser);
       router.replace('/dashboard');
       return;
     }
 
-    // If no user found
     throw new Error("Invalid credentials. Please check and try again.");
-
   }, [router]);
 
   const logout = useCallback(() => {
@@ -123,7 +106,7 @@ export function useAuth(): UseAuthReturn {
   const register = async (data: RegistrationData): Promise<{ success: boolean; message: string; }> => {
     try {
         const allStudentsData = localStorage.getItem(ALL_STUDENTS_STORAGE_KEY);
-        const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : MOCK_STUDENTS;
+        const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : [];
 
         if (students.some(s => s.rollNumber === data.rollNumber)) {
             return { success: false, message: 'A student with this roll number is already registered.' };
@@ -165,7 +148,7 @@ export function useAuth(): UseAuthReturn {
 
       try {
         const allStudentsData = localStorage.getItem(ALL_STUDENTS_STORAGE_KEY);
-        const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : MOCK_STUDENTS;
+        const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : [];
         const studentIndex = students.findIndex(s => s.rollNumber === updatedUser.rollNumber);
         if (studentIndex > -1) {
           // Can't spread AuthenticatedUser into Student, so map fields manually

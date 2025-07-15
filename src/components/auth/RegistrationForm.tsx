@@ -33,6 +33,7 @@ const registrationFormSchema = z.object({
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
   homeDepartmentId: z.string({ required_error: "Please select your home department." }),
   semester: z.coerce.number().min(1).max(8),
+  lastSemesterPercentage: z.coerce.number().min(0, "Percentage must be at least 0.").max(100, "Percentage cannot be more than 100."),
 });
 
 type RegistrationFormValues = z.infer<typeof registrationFormSchema>;
@@ -68,7 +69,7 @@ export function RegistrationForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="rollNumber"
@@ -148,6 +149,19 @@ export function RegistrationForm() {
                   ))}
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="lastSemesterPercentage"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Last Semester Percentage</FormLabel>
+              <FormControl>
+                <Input type="number" placeholder="e.g., 85.5" {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

@@ -48,6 +48,7 @@ export function StudentManager() {
                 <TableHead>Name</TableHead>
                 <TableHead>Department</TableHead>
                 <TableHead>Semester</TableHead>
+                <TableHead>Last %</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Action</TableHead>
               </TableRow>
@@ -61,6 +62,7 @@ export function StudentManager() {
                   <TableCell>{student.name}</TableCell>
                   <TableCell>{student.homeDepartmentId.toUpperCase()}</TableCell>
                   <TableCell>{student.semester}</TableCell>
+                   <TableCell>{student.lastSemesterPercentage?.toFixed(1)}%</TableCell>
                   <TableCell>
                     <Badge variant={studentStatus === 'approved' ? 'default' : 'secondary'}>
                       {studentStatus === 'approved' ? 
