@@ -1,4 +1,5 @@
 
+
 import type { LucideIcon } from 'lucide-react';
 
 export interface Department {
@@ -54,3 +55,30 @@ export type AuthenticatedUser =
       departmentId: string; // The department this user manages
     };
 
+
+// Types for the AI allocation flow
+export interface AssignElectivesStudentInput {
+  rollNumber: string;
+  preferences: string[];
+  homeDepartment: string;
+  lastSemesterPercentage: number;
+}
+
+export interface AssignElectivesDepartmentInput {
+  name: string;
+  capacity: number;
+  assignedStudents: string[];
+}
+
+export interface AssignElectivesInput {
+  students: AssignElectivesStudentInput[];
+  departments: AssignElectivesDepartmentInput[];
+}
+
+export interface AssignElectivesOutput {
+  assignments: {
+    rollNumber: string;
+    assignedDepartment?: string;
+    reason?: string;
+  }[];
+}
