@@ -2,14 +2,15 @@
 "use client";
 
 import React, { useMemo } from 'react';
-import type { Student, AuthenticatedUser } from '@/types';
+import type { Student, AuthenticatedUser, Department } from '@/types';
 import { useStudentData } from '@/hooks/useStudentData';
+import { DEPARTMENTS_DATA } from '@/lib/constants';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Check, Clock, Trash2 } from 'lucide-react';
+import { Check, Clock, Trash2, ArrowRight } from 'lucide-react';
 
 interface DepartmentStudentViewProps {
   currentUser: AuthenticatedUser;
@@ -18,6 +19,8 @@ interface DepartmentStudentViewProps {
 export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProps) {
   const { students: allStudents, saveStudents } = useStudentData();
   const { toast } = useToast();
+
+  const departmentMap = useMemo(() => new Map(DEPARTMENTS_DATA.map(dept => [dept.id, dept.name])), []);
 
   const departmentStudents = useMemo(() => {
     if (currentUser.role !== 'department') return [];
@@ -57,7 +60,7 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
       <CardHeader>
         <CardTitle>Department Student Roster</CardTitle>
         <CardDescription>
-          Approve new student registrations and view all students in the {currentUser.name}.
+          Approve new student registrations and view all students registered in the {currentUser.name}.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -69,8 +72,8 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
               <TableRow>
                 <TableHead>Roll Number</TableHead>
                 <TableHead>Name</TableHead>
-                <TableHead>Semester</TableHead>
                 <TableHead>Last %</TableHead>
+                <TableHead>Assigned Elective</TableHead>
                 <TableHead>Registration Status</TableHead>
                 <TableHead className="text-right">Action</TableHead>
               </TableRow>
@@ -82,8 +85,17 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
                 <TableRow key={student.rollNumber}>
                   <TableCell className="font-medium">{student.rollNumber}</TableCell>
                   <TableCell>{student.name}</TableCell>
-                  <TableCell>{student.semester}</TableCell>
                   <TableCell>{student.lastSemesterPercentage?.toFixed(1)}%</TableCell>
+                   <TableCell>
+                    {student.assignedElective ? (
+                      <Badge variant="outline" className="flex items-center gap-2">
+                        <ArrowRight className="h-3 w-3" />
+                        {departmentMap.get(student.assignedElective) || 'N/A'}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground">None</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <Badge variant={studentStatus === 'approved' ? 'default' : 'secondary'}>
                       {studentStatus === 'approved' ? 

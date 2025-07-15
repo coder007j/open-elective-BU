@@ -3,9 +3,9 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ApprovalManager } from '@/components/admin/AllocationManager';
 import { DepartmentStudentView } from './DepartmentStudentView';
-import { CheckSquare, Users } from 'lucide-react';
+import { IncomingStudentsView } from './IncomingStudentsView';
+import { Users, LogIn } from 'lucide-react';
 import type { AuthenticatedUser } from '@/types';
 
 interface DepartmentDashboardClientProps {
@@ -18,22 +18,22 @@ export function DepartmentDashboardClient({ currentUser }: DepartmentDashboardCl
   }
 
   return (
-    <Tabs defaultValue="approvals" className="w-full">
+    <Tabs defaultValue="roster" className="w-full">
       <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="approvals">
-          <CheckSquare className="mr-2 h-4 w-4" />
-          Elective Approvals
-        </TabsTrigger>
         <TabsTrigger value="roster">
           <Users className="mr-2 h-4 w-4" />
           Department Roster
         </TabsTrigger>
+        <TabsTrigger value="incoming">
+          <LogIn className="mr-2 h-4 w-4" />
+          Incoming Elective Students
+        </TabsTrigger>
       </TabsList>
-      <TabsContent value="approvals" className="pt-6">
-        <ApprovalManager currentUser={currentUser} />
-      </TabsContent>
       <TabsContent value="roster" className="pt-6">
         <DepartmentStudentView currentUser={currentUser} />
+      </TabsContent>
+      <TabsContent value="incoming" className="pt-6">
+        <IncomingStudentsView currentUser={currentUser} />
       </TabsContent>
     </Tabs>
   );
