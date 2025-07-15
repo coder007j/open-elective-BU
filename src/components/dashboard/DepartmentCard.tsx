@@ -71,7 +71,7 @@ export function DepartmentCard({ department, isSelected, onSelect, isDisabled }:
       <CardFooter className="pt-0 border-t mt-auto p-3">
          <Dialog>
           <DialogTrigger asChild>
-            <Button variant="ghost" size="sm" className="w-full">
+            <Button variant="secondary" size="sm" className="w-full">
               <BookOpen className="mr-2 h-4 w-4" />
               View Syllabus
             </Button>
