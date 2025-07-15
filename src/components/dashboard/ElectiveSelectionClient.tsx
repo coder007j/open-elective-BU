@@ -7,7 +7,8 @@ import { DepartmentCard } from './DepartmentCard';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { DEPARTMENTS_DATA, MAX_PREFERENCES } from '@/lib/constants';
+import { MAX_PREFERENCES } from '@/lib/constants';
+import { useStudentData } from '@/hooks/useStudentData';
 import { AssignmentResultDisplay } from './AssignmentResultDisplay';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info, Loader2, Send, Clock } from 'lucide-react';
@@ -15,9 +16,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 export function ElectiveSelectionClient() {
   const { currentUser, savePreferences } = useAuth();
+  const { departments } = useStudentData(); // Get departments from the central hook
   const { toast } = useToast();
 
-  const [departments] = useState<Department[]>(DEPARTMENTS_DATA);
   const [selectedPreferences, setSelectedPreferences] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   

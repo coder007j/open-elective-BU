@@ -8,7 +8,8 @@ export const DEPARTMENTS_DATA: Department[] = [
     capacity: 2, 
     description: 'Explore algorithms, AI, and software development.', 
     iconName: 'Cpu',
-    assignedStudents: ['EXISTING_STUDENT_1'] // Simulate some existing assignments
+    syllabus: 'Module 1: Intro to AI. Module 2: Machine Learning basics. Module 3: Neural Networks.',
+    assignedStudents: ['EXISTING_STUDENT_1']
   },
   { 
     id: 'mech', 
@@ -16,6 +17,7 @@ export const DEPARTMENTS_DATA: Department[] = [
     capacity: 3, 
     description: 'Design and build mechanical systems.', 
     iconName: 'Wrench',
+    syllabus: 'Module 1: Thermodynamics. Module 2: Fluid Mechanics. Module 3: Kinematics.',
     assignedStudents: [] 
   },
   { 
@@ -24,6 +26,7 @@ export const DEPARTMENTS_DATA: Department[] = [
     capacity: 1, 
     description: 'Delve into circuits, power systems, and electronics.', 
     iconName: 'Zap',
+    syllabus: 'Module 1: Circuit Theory. Module 2: Electromagnetism. Module 3: Power Systems.',
     assignedStudents: ['EXISTING_STUDENT_2'] 
   },
   { 
@@ -32,6 +35,7 @@ export const DEPARTMENTS_DATA: Department[] = [
     capacity: 2, 
     description: 'Shape the infrastructure of tomorrow.', 
     iconName: 'Building',
+    syllabus: 'Module 1: Structural Analysis. Module 2: Geotechnical Engineering. Module 3: Transportation Engineering.',
     assignedStudents: []
   },
   { 
@@ -40,6 +44,7 @@ export const DEPARTMENTS_DATA: Department[] = [
     capacity: 2, 
     description: 'Innovate at the intersection of biology and technology.', 
     iconName: 'FlaskConical',
+    syllabus: 'Module 1: Molecular Biology. Module 2: Genetic Engineering. Module 3: Bioprocess Technology.',
     assignedStudents: []
   },
   { 
@@ -47,7 +52,8 @@ export const DEPARTMENTS_DATA: Department[] = [
     name: 'Humanities & Social Sciences', 
     capacity: 4, 
     description: 'Understand human culture, society, and behavior.', 
-    iconName: 'CustomAcademicCap', // Using custom icon
+    iconName: 'CustomAcademicCap',
+    syllabus: 'Module 1: Sociology. Module 2: Psychology. Module 3: World History.',
     assignedStudents: ['EXISTING_STUDENT_3'] 
   },
 ];
