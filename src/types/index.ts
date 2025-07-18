@@ -34,6 +34,8 @@ export interface DepartmentUser {
   departmentId: string;
 }
 
+export type RegistrationData = Omit<Student, 'preferences' | 'assignedElective' | 'assignmentReason' | 'status' | 'homeDeptApproval' | 'electiveDeptApproval'>;
+
 
 export interface AssignmentResult {
   rollNumber: string;

@@ -3,19 +3,18 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import type { AuthenticatedUser, Student, DepartmentUser } from '@/types';
+import type { AuthenticatedUser, Student, DepartmentUser, RegistrationData } from '@/types';
 import { MOCK_STUDENTS, MOCK_DEPARTMENT_USERS } from '@/lib/constants';
+import { useStudentData } from './useStudentData';
 
 const AUTH_STORAGE_KEY = 'openElectiveUser';
 const ALL_STUDENTS_STORAGE_KEY = 'allStudentsData';
-
-type RegistrationData = Omit<Student, 'preferences' | 'assignedElective' | 'assignmentReason' | 'status' | 'homeDeptApproval' | 'electiveDeptApproval'>;
 
 
 interface UseAuthReturn {
   currentUser: AuthenticatedUser | null;
   isLoading: boolean;
-  login: (rollNumber: string, passwordAttempt: string) => void;
+  login: (rollNumber: string, passwordAttempt: string) => Promise<void>;
   logout: () => void;
   register: (data: RegistrationData) => Promise<{ success: boolean; message: string; }>;
   savePreferences: (preferences: string[]) => void;
@@ -26,6 +25,7 @@ export function useAuth(): UseAuthReturn {
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const { students: allStudents, registerStudent } = useStudentData();
 
   useEffect(() => {
     try {
@@ -34,8 +34,8 @@ export function useAuth(): UseAuthReturn {
         setCurrentUser(JSON.parse(storedUser));
       }
       
-      const allStudents = localStorage.getItem(ALL_STUDENTS_STORAGE_KEY);
-      if (!allStudents) {
+      const studentsData = localStorage.getItem(ALL_STUDENTS_STORAGE_KEY);
+      if (!studentsData) {
          localStorage.setItem(ALL_STUDENTS_STORAGE_KEY, JSON.stringify(MOCK_STUDENTS));
       }
 
@@ -74,9 +74,7 @@ export function useAuth(): UseAuthReturn {
     }
 
     // Student Login
-    const allStudentsData = localStorage.getItem(ALL_STUDENTS_STORAGE_KEY);
-    const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : [];
-    const userToAuth = students.find(s => s.rollNumber === rollNumber);
+    const userToAuth = allStudents.find(s => s.rollNumber === rollNumber);
 
     if (userToAuth && userToAuth.password === passwordAttempt) {
       if (userToAuth.status !== 'approved') {
@@ -95,7 +93,7 @@ export function useAuth(): UseAuthReturn {
     }
 
     throw new Error("Invalid credentials. Please check and try again.");
-  }, [router]);
+  }, [router, allStudents]);
 
   const logout = useCallback(() => {
     localStorage.removeItem(AUTH_STORAGE_KEY);
@@ -103,34 +101,9 @@ export function useAuth(): UseAuthReturn {
     router.push('/'); 
   }, [router]);
   
-  const register = async (data: RegistrationData): Promise<{ success: boolean; message: string; }> => {
-    try {
-        const allStudentsData = localStorage.getItem(ALL_STUDENTS_STORAGE_KEY);
-        const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : [];
-
-        if (students.some(s => s.rollNumber === data.rollNumber)) {
-            return { success: false, message: 'A student with this roll number is already registered.' };
-        }
-
-        const newStudent: Student = {
-            ...data,
-            status: 'pending',
-            preferences: [],
-            assignedElective: null,
-            assignmentReason: null,
-            homeDeptApproval: false,
-            electiveDeptApproval: false,
-        };
-        
-        students.push(newStudent);
-        localStorage.setItem(ALL_STUDENTS_STORAGE_KEY, JSON.stringify(students));
-        
-        return { success: true, message: 'Registration successful. Awaiting approval.' };
-    } catch (e) {
-        const message = e instanceof Error ? e.message : "An unknown error occurred.";
-        return { success: false, message };
-    }
-  };
+  const register = useCallback(async (data: RegistrationData): Promise<{ success: boolean; message: string; }> => {
+    return registerStudent(data);
+  }, [registerStudent]);
 
   const savePreferences = useCallback((preferences: string[]) => {
     setCurrentUser(prevUser => {

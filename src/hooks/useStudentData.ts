@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import type { Student, Department } from '@/types';
+import type { Student, Department, RegistrationData } from '@/types';
 import { MOCK_STUDENTS, DEPARTMENTS_DATA } from '@/lib/constants';
 
 const ALL_STUDENTS_STORAGE_KEY = 'allStudentsData';
@@ -48,6 +48,34 @@ export function useStudentData() {
     localStorage.setItem(ALL_DEPARTMENTS_STORAGE_KEY, JSON.stringify(updatedDepartments));
   }, []);
 
+  const registerStudent = useCallback(async (data: RegistrationData): Promise<{ success: boolean; message: string; }> => {
+    try {
+        const currentStudents = [...students];
 
-  return { students, saveStudents, departments, saveDepartments };
+        if (currentStudents.some(s => s.rollNumber === data.rollNumber)) {
+            return { success: false, message: 'A student with this roll number is already registered.' };
+        }
+
+        const newStudent: Student = {
+            ...data,
+            status: 'pending',
+            preferences: [],
+            assignedElective: null,
+            assignmentReason: null,
+            homeDeptApproval: false,
+            electiveDeptApproval: false,
+        };
+        
+        const updatedStudents = [...currentStudents, newStudent];
+        saveStudents(updatedStudents);
+        
+        return { success: true, message: 'Registration successful. Awaiting approval.' };
+    } catch (e) {
+        const message = e instanceof Error ? e.message : "An unknown error occurred.";
+        return { success: false, message };
+    }
+  }, [students, saveStudents]);
+
+
+  return { students, saveStudents, departments, saveDepartments, registerStudent };
 }

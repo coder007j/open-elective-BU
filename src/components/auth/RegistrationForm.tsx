@@ -24,8 +24,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, UserPlus } from "lucide-react";
-import { useAuth } from '@/hooks/useAuth';
+import { useStudentData } from '@/hooks/useStudentData';
 import { DEPARTMENTS_DATA } from '@/lib/constants';
+import type { RegistrationData } from '@/types';
 
 const registrationFormSchema = z.object({
   rollNumber: z.string().min(1, { message: "Roll number is required." }),
@@ -40,16 +41,23 @@ type RegistrationFormValues = z.infer<typeof registrationFormSchema>;
 
 export function RegistrationForm() {
   const { toast } = useToast();
-  const { register } = useAuth();
+  const { registerStudent } = useStudentData();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<RegistrationFormValues>({
     resolver: zodResolver(registrationFormSchema),
+    defaultValues: {
+      rollNumber: "",
+      name: "",
+      password: "",
+      semester: 1,
+      lastSemesterPercentage: 0,
+    }
   });
 
   async function onSubmit(values: RegistrationFormValues) {
     setIsLoading(true);
-    const result = await register(values);
+    const result = await registerStudent(values as RegistrationData);
     setIsLoading(false);
 
     if (result.success) {
@@ -57,7 +65,14 @@ export function RegistrationForm() {
         title: "Registration Successful",
         description: "Your registration is submitted and is pending approval from the department.",
       });
-      form.reset();
+      form.reset({
+        rollNumber: "",
+        name: "",
+        password: "",
+        homeDepartmentId: undefined,
+        semester: 1,
+        lastSemesterPercentage: 0,
+      });
     } else {
       toast({
         title: "Registration Failed",
