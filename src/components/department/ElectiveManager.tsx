@@ -44,8 +44,8 @@ export function ElectiveManager({ currentUser }: ElectiveManagerProps) {
   useEffect(() => {
     if (myElective) {
       form.reset({
-        capacity: myElective.capacity,
-        syllabus: myElective.syllabus,
+        capacity: myElective.capacity || 0,
+        syllabus: myElective.syllabus || "",
       });
     }
   }, [myElective, form]);
