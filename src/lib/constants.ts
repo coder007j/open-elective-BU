@@ -71,4 +71,4 @@ export const MOCK_DEPARTMENT_USERS: DepartmentUser[] = DEPARTMENTS_DATA.map(dept
 }));
 
 
-export const MAX_PREFERENCES = 4;
+export const MAX_PREFERENCES = 5;
