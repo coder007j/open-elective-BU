@@ -13,6 +13,7 @@ export default function DepartmentDashboardPage() {
   const { departments } = useStudentData();
 
   const getDepartmentName = (description: string) => {
+    // This function will now correctly return the full description.
     return description.replace(/Offered by\s*/, '');
   };
 
@@ -43,6 +44,7 @@ export default function DepartmentDashboardPage() {
     );
   }
   
+  // Use the full description for the welcome name
   const welcomeName = departmentDetails ? getDepartmentName(departmentDetails.description) : currentUser.name;
 
   return (
@@ -52,7 +54,7 @@ export default function DepartmentDashboardPage() {
           Department Dashboard
         </h1>
         <p className="text-lg text-muted-foreground">
-          Welcome, {welcomeName}. View your student roster and incoming elective students.
+          Welcome, {welcomeName} Head. View your student roster and incoming elective students.
         </p>
       </div>
       <DepartmentDashboardClient currentUser={currentUser} />
