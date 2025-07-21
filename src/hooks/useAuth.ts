@@ -3,8 +3,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import type { AuthenticatedUser, Student, DepartmentUser, RegistrationData } from '@/types';
-import { MOCK_STUDENTS, MOCK_DEPARTMENT_USERS } from '@/lib/constants';
+import type { AuthenticatedUser, Student, DepartmentUser, RegistrationData, Department } from '@/types';
+import { MOCK_STUDENTS, MOCK_DEPARTMENT_USERS, DEPARTMENTS_DATA } from '@/lib/constants';
 import { useStudentData } from './useStudentData';
 
 const AUTH_STORAGE_KEY = 'openElectiveUser';
@@ -25,7 +25,7 @@ export function useAuth(): UseAuthReturn {
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const { students: allStudents, registerStudent } = useStudentData();
+  const { students: allStudents, registerStudent, departments } = useStudentData();
 
   useEffect(() => {
     try {
@@ -60,11 +60,13 @@ export function useAuth(): UseAuthReturn {
     // Department Login
     const deptUserToAuth = MOCK_DEPARTMENT_USERS.find(d => d.id === rollNumber);
     if (deptUserToAuth && deptUserToAuth.password === passwordAttempt) {
-        const { password, ...deptData } = deptUserToAuth;
+        const departmentDetails = departments.find(d => d.id === deptUserToAuth.departmentId);
+        
         const departmentUser: AuthenticatedUser = {
-            rollNumber: deptData.id,
-            name: deptData.name,
-            departmentId: deptData.departmentId,
+            rollNumber: deptUserToAuth.id,
+            // Set the name from the full department description for correct display
+            name: departmentDetails ? departmentDetails.description : deptUserToAuth.name,
+            departmentId: deptUserToAuth.departmentId,
             role: 'department',
         };
         localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(departmentUser));
@@ -93,7 +95,7 @@ export function useAuth(): UseAuthReturn {
     }
 
     throw new Error("Invalid credentials. Please check and try again.");
-  }, [router, allStudents]);
+  }, [router, allStudents, departments]);
 
   const logout = useCallback(() => {
     localStorage.removeItem(AUTH_STORAGE_KEY);
@@ -114,8 +116,6 @@ export function useAuth(): UseAuthReturn {
         preferences: preferences,
         assignedElective: null,
         assignmentReason: 'Your preferences have been saved and are now awaiting final allocation.',
-        homeDeptApproval: false,
-        electiveDeptApproval: false,
       };
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedUser));
 
@@ -124,14 +124,11 @@ export function useAuth(): UseAuthReturn {
         const students: Student[] = allStudentsData ? JSON.parse(allStudentsData) : [];
         const studentIndex = students.findIndex(s => s.rollNumber === updatedUser.rollNumber);
         if (studentIndex > -1) {
-          // Can't spread AuthenticatedUser into Student, so map fields manually
           const studentToSave: Student = {
             ...students[studentIndex],
             preferences: updatedUser.preferences,
             assignedElective: updatedUser.assignedElective,
             assignmentReason: updatedUser.assignmentReason,
-            homeDeptApproval: updatedUser.homeDeptApproval,
-            electiveDeptApproval: updatedUser.electiveDeptApproval,
           };
           students[studentIndex] = studentToSave;
           localStorage.setItem(ALL_STUDENTS_STORAGE_KEY, JSON.stringify(students));
