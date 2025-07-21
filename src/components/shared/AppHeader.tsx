@@ -28,7 +28,7 @@ export function AppHeader() {
     if (!currentUser) return "";
     if (currentUser.role === 'department') {
         // Extracts "Dept. of X" from "Offered by Dept. of X"
-        return currentUser.name.replace(/Offered by\s*/, '') + ' Head';
+        return `${currentUser.name.replace(/Offered by\s*/, '')} Head`;
     }
     return `${currentUser.name} (${currentUser.rollNumber})`;
   };
