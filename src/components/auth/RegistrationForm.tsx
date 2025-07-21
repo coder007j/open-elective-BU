@@ -54,6 +54,10 @@ export function RegistrationForm() {
       lastSemesterPercentage: 0,
     }
   });
+  
+  const getDepartmentName = (description: string) => {
+    return description.replace('Offered by ', '');
+  };
 
   async function onSubmit(values: RegistrationFormValues) {
     setIsLoading(true);
@@ -138,7 +142,7 @@ export function RegistrationForm() {
                 </FormControl>
                 <SelectContent>
                   {DEPARTMENTS_DATA.map(dept => (
-                    <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
+                    <SelectItem key={dept.id} value={dept.id}>{getDepartmentName(dept.description)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
