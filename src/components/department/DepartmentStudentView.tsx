@@ -17,10 +17,15 @@ interface DepartmentStudentViewProps {
 }
 
 export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProps) {
-  const { students: allStudents, saveStudents } = useStudentData();
+  const { students: allStudents, saveStudents, departments } = useStudentData();
   const { toast } = useToast();
 
-  const departmentMap = useMemo(() => new Map(DEPARTMENTS_DATA.map(dept => [dept.id, dept.name])), []);
+  const departmentMap = useMemo(() => new Map(departments.map(dept => [dept.id, dept.name])), [departments]);
+  
+  const currentDepartmentDetails = useMemo(() => {
+     if (currentUser.role !== 'department') return null;
+     return departments.find(d => d.id === currentUser.departmentId);
+  }, [currentUser, departments]);
 
   const departmentStudents = useMemo(() => {
     if (currentUser.role !== 'department') return [];
@@ -53,6 +58,11 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
         variant: "destructive"
     });
   };
+  
+  const getDepartmentName = (description: string) => {
+    return description.replace(/Offered by\s*/, '');
+  };
+
 
   if (currentUser.role !== 'department') return null;
 
@@ -61,7 +71,7 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
       <CardHeader>
         <CardTitle>Department Student Roster</CardTitle>
         <CardDescription>
-          Approve new student registrations and view all students registered in the {currentUser.name}.
+          Approve new student registrations and view all students registered in the {currentDepartmentDetails ? getDepartmentName(currentDepartmentDetails.description) : currentUser.name}.
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -56,7 +56,8 @@ export function RegistrationForm() {
   });
   
   const getDepartmentName = (description: string) => {
-    return description.replace('Offered by ', '');
+    // Standardizes getting the department name from the description field
+    return description.replace(/Offered by\s*/, '');
   };
 
   async function onSubmit(values: RegistrationFormValues) {
