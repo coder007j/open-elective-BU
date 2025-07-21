@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Check, Clock, ArrowRight, Trash2 } from 'lucide-react';
+import { Check, Clock, ArrowRight, Trash2, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface DepartmentStudentViewProps {
@@ -20,10 +20,6 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
   const { toast } = useToast();
 
   const departmentMap = useMemo(() => new Map(departments.map(dept => [dept.id, dept.name])), [departments]);
-  
-  const getDepartmentName = (description: string) => {
-    return description.replace(/Offered by\s*/, '');
-  };
 
   const currentDepartmentDetails = useMemo(() => {
      if (currentUser.role !== 'department') return null;
@@ -60,7 +56,7 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
   };
 
   if (currentUser.role !== 'department') return null;
-  const welcomeName = currentDepartmentDetails ? getDepartmentName(currentDepartmentDetails.description) : currentUser.name;
+  const welcomeName = currentDepartmentDetails ? currentDepartmentDetails.name : currentUser.name;
 
   return (
     <Card>
@@ -110,16 +106,21 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
                       <span className="text-muted-foreground">None</span>
                     )}
                   </TableCell>
-                   <TableCell className="text-right space-x-2">
-                    {studentStatus === 'pending' && (
-                      <>
+                   <TableCell className="text-right">
+                    {studentStatus === 'pending' ? (
+                      <div className="space-x-2">
                         <Button size="sm" onClick={() => handleApproveStudent(student.rollNumber)}>
                            <Check className="mr-2 h-4 w-4" /> Approve
                         </Button>
                          <Button variant="destructive" size="sm" onClick={() => handleDeleteStudent(student.rollNumber)}>
                             <Trash2 className="h-4 w-4" />
                         </Button>
-                      </>
+                      </div>
+                    ) : (
+                       <div className="flex justify-end items-center text-muted-foreground text-xs">
+                          <ShieldCheck className="mr-2 h-4 w-4 text-green-600"/>
+                          Managed
+                       </div>
                     )}
                   </TableCell>
                 </TableRow>

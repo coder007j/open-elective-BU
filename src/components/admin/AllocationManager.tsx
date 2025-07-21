@@ -4,7 +4,6 @@
 import React, { useState, useMemo } from 'react';
 import type { Department, Student, AssignElectivesInput, AssignElectivesOutput } from '@/types';
 import { useStudentData } from '@/hooks/useStudentData';
-import { DEPARTMENTS_DATA } from '@/lib/constants';
 import { assignElectives } from '@/ai/flows/assign-electives';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -17,8 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export function AllocationManager() {
   const { toast } = useToast();
-  const { students, saveStudents } = useStudentData();
-  const [departments, setDepartments] = useState<Department[]>(DEPARTMENTS_DATA);
+  const { students, departments, saveStudents } = useStudentData();
   const [isLoading, setIsLoading] = useState(false);
   const [allocationResult, setAllocationResult] = useState<AssignElectivesOutput | null>(null);
 
