@@ -66,7 +66,8 @@ export const MOCK_STUDENTS: Student[] = [
 export const MOCK_DEPARTMENT_USERS: DepartmentUser[] = DEPARTMENTS_DATA.map(dept => ({
   id: dept.id,
   password: 'password',
-  name: `${dept.name} Head`,
+  // Use the full description for the name, it will be processed in the UI
+  name: dept.description, 
   departmentId: dept.id
 }));
 

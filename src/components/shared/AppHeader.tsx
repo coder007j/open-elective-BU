@@ -24,6 +24,16 @@ export function AppHeader() {
     }
   };
 
+  const getDisplayName = () => {
+    if (!currentUser) return "";
+    if (currentUser.role === 'department') {
+        // Extracts "Dept. of X" from "Offered by Dept. of X"
+        return currentUser.name.replace(/Offered by\s*/, '') + ' Head';
+    }
+    return `${currentUser.name} (${currentUser.rollNumber})`;
+  };
+
+
   const homeLink = getHomeLink();
 
   return (
@@ -36,7 +46,7 @@ export function AppHeader() {
         <div className="flex items-center gap-4">
           {currentUser && (
             <span className="text-sm text-muted-foreground hidden sm:inline">
-              Welcome, {currentUser.name} ({currentUser.rollNumber})
+              Welcome, {getDisplayName()}
             </span>
           )}
           <Button variant="outline" size="sm" onClick={logout}>
