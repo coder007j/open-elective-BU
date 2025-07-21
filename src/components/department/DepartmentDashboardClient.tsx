@@ -5,7 +5,8 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DepartmentStudentView } from './DepartmentStudentView';
 import { IncomingStudentsView } from './IncomingStudentsView';
-import { Users, LogIn } from 'lucide-react';
+import { ElectiveManager } from './ElectiveManager';
+import { Users, LogIn, Settings } from 'lucide-react';
 import type { AuthenticatedUser } from '@/types';
 
 interface DepartmentDashboardClientProps {
@@ -19,7 +20,7 @@ export function DepartmentDashboardClient({ currentUser }: DepartmentDashboardCl
 
   return (
     <Tabs defaultValue="roster" className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
+      <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="roster">
           <Users className="mr-2 h-4 w-4" />
           Department Roster
@@ -28,12 +29,19 @@ export function DepartmentDashboardClient({ currentUser }: DepartmentDashboardCl
           <LogIn className="mr-2 h-4 w-4" />
           Incoming Elective Students
         </TabsTrigger>
+        <TabsTrigger value="manage">
+          <Settings className="mr-2 h-4 w-4" />
+          Manage Elective
+        </TabsTrigger>
       </TabsList>
       <TabsContent value="roster" className="pt-6">
         <DepartmentStudentView currentUser={currentUser} />
       </TabsContent>
       <TabsContent value="incoming" className="pt-6">
         <IncomingStudentsView currentUser={currentUser} />
+      </TabsContent>
+      <TabsContent value="manage" className="pt-6">
+        <ElectiveManager currentUser={currentUser} />
       </TabsContent>
     </Tabs>
   );
