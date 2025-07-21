@@ -117,17 +117,10 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
                         </Button>
                       </div>
                     ) : (
-                      student.assignedElective ? (
-                        <div className="flex justify-end items-center text-muted-foreground text-xs">
-                          <ShieldCheck className="mr-2 h-4 w-4 text-green-600"/>
-                           Allocation Complete
-                       </div>
-                      ) : (
-                        <div className="flex justify-end items-center text-muted-foreground text-xs">
+                       <div className="flex justify-end items-center text-muted-foreground text-xs">
                           <Check className="mr-2 h-4 w-4 text-green-600"/>
                           Approved
                        </div>
-                      )
                     )}
                   </TableCell>
                 </TableRow>
