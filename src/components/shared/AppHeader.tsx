@@ -26,11 +26,15 @@ export function AppHeader() {
 
   const getDisplayName = () => {
     if (!currentUser) return "";
-    // This logic is now simplified. The name is correctly set during login.
+    // Display the name directly for department heads as it's correctly set on login.
     if (currentUser.role === 'department') {
         return currentUser.name;
     }
-    return `${currentUser.name} (${currentUser.rollNumber})`;
+    // For students and admins, show the name (and roll number for students).
+    if (currentUser.role === 'student') {
+      return `${currentUser.name} (${currentUser.rollNumber})`;
+    }
+    return currentUser.name;
   };
 
 

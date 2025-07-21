@@ -62,10 +62,10 @@ export function useAuth(): UseAuthReturn {
     if (deptUserToAuth && deptUserToAuth.password === passwordAttempt) {
         const departmentDetails = departments.find(d => d.id === deptUserToAuth.departmentId);
         
-        // This is the definitive fix. We construct the correct name here.
+        // This is the definitive fix. Set the name to the department's description field.
         const departmentDisplayName = departmentDetails 
-            ? `${departmentDetails.description.replace(/Offered by\s*/, '')} Head`
-            : `${deptUserToAuth.name} Head`;
+            ? departmentDetails.description.replace(/Offered by\s*/, '')
+            : deptUserToAuth.name;
 
         const departmentUser: AuthenticatedUser = {
             rollNumber: deptUserToAuth.id,
