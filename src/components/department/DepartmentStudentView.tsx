@@ -24,6 +24,7 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
 
   const departmentStudents = useMemo(() => {
     if (currentUser.role !== 'department') return [];
+    // Correctly filter students where their home department ID matches the logged-in department user's ID.
     return allStudents.filter(student => student.homeDepartmentId === currentUser.departmentId);
   }, [allStudents, currentUser]);
 
