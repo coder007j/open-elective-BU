@@ -70,9 +70,9 @@ const assignElectivesPrompt = ai.definePrompt({
       - Loop until no more assignments can be made.
       - In each loop, iterate through each home department group.
       - From each group, take the top-ranked student who has not yet been processed.
-      - For that student, iterate through their `preferences` array.
+      - For that student, iterate through their 'preferences' array.
       - Find the first preferred department that is not yet at capacity.
-      - If found, assign the student to that department, add their roll number to the department's `assignedStudents` list, and record the assignment result. Set the reason based on which preference was met (e.g., "Assigned to 1st preference.").
+      - If found, assign the student to that department, add their roll number to the department's 'assignedStudents' list, and record the assignment result. Set the reason based on which preference was met (e.g., "Assigned to 1st preference.").
       - If all of the student's preferred departments are full, they cannot be assigned. Record this result with a reason like "All preferred electives were full."
       - Mark the student as processed and move to the next department in the round-robin.
   4.  **Final Output:** Once the process is complete, return the 'assignments' array with the results for every single student provided in the input.
