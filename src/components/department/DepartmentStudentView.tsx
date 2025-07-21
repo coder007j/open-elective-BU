@@ -106,7 +106,7 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
                       <span className="text-muted-foreground">None</span>
                     )}
                   </TableCell>
-                   <TableCell className="text-right">
+                  <TableCell className="text-right">
                     {studentStatus === 'pending' ? (
                       <div className="space-x-2">
                         <Button size="sm" onClick={() => handleApproveStudent(student.rollNumber)}>
@@ -117,10 +117,17 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
                         </Button>
                       </div>
                     ) : (
-                       <div className="flex justify-end items-center text-muted-foreground text-xs">
+                      student.assignedElective ? (
+                        <div className="flex justify-end items-center text-muted-foreground text-xs">
                           <ShieldCheck className="mr-2 h-4 w-4 text-green-600"/>
-                          Managed
+                           Allocation Complete
                        </div>
+                      ) : (
+                        <div className="flex justify-end items-center text-muted-foreground text-xs">
+                          <Check className="mr-2 h-4 w-4 text-green-600"/>
+                          Approved
+                       </div>
+                      )
                     )}
                   </TableCell>
                 </TableRow>
