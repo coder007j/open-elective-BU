@@ -113,7 +113,7 @@ export function useAuth(): UseAuthReturn {
         ...prevUser,
         preferences: preferences,
         assignedElective: null,
-        assignmentReason: 'Your preferences have been saved and are now awaiting approval.',
+        assignmentReason: 'Your preferences have been saved and are now awaiting final allocation.',
         homeDeptApproval: false,
         electiveDeptApproval: false,
       };

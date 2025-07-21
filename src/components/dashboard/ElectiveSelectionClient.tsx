@@ -58,19 +58,19 @@ export function ElectiveSelectionClient() {
     savePreferences(selectedPreferences);
     toast({
       title: "Preferences Submitted",
-      description: "Your choices have been saved and are awaiting approval.",
+      description: "Your choices have been saved and are awaiting final allocation.",
     });
     setIsLoading(false);
   };
 
   if (!currentUser) return <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />;
 
-  // Case 1: Student has a final, approved assignment
+  // Case 1: Student has a final, assigned assignment
   if (currentUser.assignedElective) {
     return <AssignmentResultDisplay student={currentUser} />;
   }
 
-  // Case 2: Student has submitted preferences, awaiting approval
+  // Case 2: Student has submitted preferences, awaiting final allocation
   if (currentUser.preferences.length > 0 && !currentUser.assignedElective) {
     return (
       <Card className="w-full max-w-2xl mx-auto shadow-lg bg-card">
@@ -78,7 +78,7 @@ export function ElectiveSelectionClient() {
           <Clock className="h-16 w-16 text-primary mb-4" />
           <CardTitle className="text-2xl font-headline text-primary">Preferences Submitted</CardTitle>
           <CardDescription>
-            {currentUser.assignmentReason || "Your choices are awaiting approval from the departments."}
+            Your elective choices have been saved and are now pending final allocation by the admin.
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center">
@@ -89,7 +89,7 @@ export function ElectiveSelectionClient() {
                 return <li key={id}>{dept?.name || 'Unknown Department'}</li>;
               })}
             </ol>
-          <p className="mt-6 text-sm text-muted-foreground">You will be notified once your assignment is finalized. You can resubmit your preferences until the deadline.</p>
+          <p className="mt-6 text-sm text-muted-foreground">You can edit your preferences until the allocation process is run by the administrator.</p>
            <Button onClick={() => savePreferences([])} variant="outline" className="mt-4">
             Edit Preferences
           </Button>
@@ -155,7 +155,7 @@ export function ElectiveSelectionClient() {
             ) : (
               <>
                 <Send className="mr-2 h-5 w-5" />
-                Submit Preferences for Approval
+                Submit Preferences
               </>
             )}
           </Button>
