@@ -1,11 +1,12 @@
+
 "use client";
 
 import type { AuthenticatedUser, Department } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DEPARTMENTS_DATA } from '@/lib/constants';
 import { CheckCircle, XCircle } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { CustomAcademicCapIcon } from '@/components/icons/CustomAcademicCapIcon';
+import { useStudentData } from '@/hooks/useStudentData'; // Use the hook to get dynamic data
 
 interface AssignmentResultDisplayProps {
   student: AuthenticatedUser;
@@ -22,6 +23,8 @@ const IconComponent = ({ name, ...props }: {name: Department['iconName']} & Luci
 
 
 export function AssignmentResultDisplay({ student }: AssignmentResultDisplayProps) {
+  const { departments } = useStudentData(); // Fetch dynamic department data
+
   if (!student.assignedElective) {
     return (
       <Card className="w-full max-w-2xl mx-auto shadow-lg bg-card">
@@ -39,7 +42,7 @@ export function AssignmentResultDisplay({ student }: AssignmentResultDisplayProp
     );
   }
 
-  const assignedDept = DEPARTMENTS_DATA.find(d => d.id === student.assignedElective);
+  const assignedDept = departments.find(d => d.id === student.assignedElective);
 
   return (
     <Card className="w-full max-w-2xl mx-auto shadow-xl border-2 border-accent bg-background">

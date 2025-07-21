@@ -64,7 +64,7 @@ export function LoginTabs() {
           </TabsContent>
           <TabsContent value="register" className="pt-4">
              <p className="text-sm text-center text-muted-foreground mb-4">
-              New students must register here. Your account will require admin approval before you can log in.
+              New students must register here. Your account will require approval from your home department before you can log in.
             </p>
             <RegistrationForm />
           </TabsContent>

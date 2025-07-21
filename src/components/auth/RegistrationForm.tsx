@@ -25,7 +25,6 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, UserPlus } from "lucide-react";
 import { useStudentData } from '@/hooks/useStudentData';
-import { DEPARTMENTS_DATA } from '@/lib/constants';
 import type { RegistrationData } from '@/types';
 
 const registrationFormSchema = z.object({
@@ -41,7 +40,7 @@ type RegistrationFormValues = z.infer<typeof registrationFormSchema>;
 
 export function RegistrationForm() {
   const { toast } = useToast();
-  const { registerStudent } = useStudentData();
+  const { registerStudent, departments } = useStudentData(); // Use dynamic departments
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<RegistrationFormValues>({
@@ -56,7 +55,6 @@ export function RegistrationForm() {
   });
   
   const getDepartmentName = (description: string) => {
-    // Standardizes getting the department name from the description field
     return description.replace(/Offered by\s*/, '');
   };
 
@@ -68,7 +66,7 @@ export function RegistrationForm() {
     if (result.success) {
       toast({
         title: "Registration Successful",
-        description: "Your registration is submitted and is pending approval from the department.",
+        description: "Your registration is submitted and is pending approval from your home department.",
       });
       form.reset({
         rollNumber: "",
@@ -142,7 +140,7 @@ export function RegistrationForm() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {DEPARTMENTS_DATA.map(dept => (
+                  {departments.map(dept => (
                     <SelectItem key={dept.id} value={dept.id}>{getDepartmentName(dept.description)}</SelectItem>
                   ))}
                 </SelectContent>

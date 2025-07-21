@@ -4,7 +4,6 @@
 import React, { useMemo } from 'react';
 import type { AuthenticatedUser } from '@/types';
 import { useStudentData } from '@/hooks/useStudentData';
-import { DEPARTMENTS_DATA } from '@/lib/constants';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -14,8 +13,8 @@ interface IncomingStudentsViewProps {
 }
 
 export function IncomingStudentsView({ currentUser }: IncomingStudentsViewProps) {
-  const { students: allStudents } = useStudentData();
-  const departmentMap = useMemo(() => new Map(DEPARTMENTS_DATA.map(dept => [dept.id, dept.name])), []);
+  const { students: allStudents, departments } = useStudentData();
+  const departmentMap = useMemo(() => new Map(departments.map(dept => [dept.id, dept.name])), [departments]);
 
   const incomingStudents = useMemo(() => {
     if (currentUser.role !== 'department') return [];
