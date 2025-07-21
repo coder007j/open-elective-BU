@@ -4,7 +4,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check, Clock } from 'lucide-react';
+import { Check, Clock, Trash2 } from 'lucide-react';
 import type { Student } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -31,11 +31,21 @@ export function StudentManager() {
     });
   };
 
+  const handleDeleteStudent = (rollNumber: string) => {
+    const updatedStudents = students.filter(student => student.rollNumber !== rollNumber);
+    saveStudents(updatedStudents);
+    toast({
+        title: "Registration Removed",
+        description: `The registration for student ${rollNumber} has been removed.`,
+        variant: "destructive"
+    });
+  };
+
   return (
     <Card className="shadow-lg">
       <CardHeader>
         <CardTitle className="text-2xl font-headline text-primary">Student Registrations</CardTitle>
-        <CardDescription>View and approve student registrations.</CardDescription>
+        <CardDescription>View and approve all new student registrations. Approved students can then log in to select electives.</CardDescription>
       </CardHeader>
       <CardContent>
         {students.length === 0 ? (
@@ -72,11 +82,16 @@ export function StudentManager() {
                       {studentStatus.charAt(0).toUpperCase() + studentStatus.slice(1)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right space-x-2">
                     {studentStatus === 'pending' && (
-                      <Button size="sm" onClick={() => handleApproveStudent(student.rollNumber)}>
-                        Approve
-                      </Button>
+                      <>
+                        <Button size="sm" onClick={() => handleApproveStudent(student.rollNumber)}>
+                          Approve
+                        </Button>
+                         <Button variant="destructive" size="sm" onClick={() => handleDeleteStudent(student.rollNumber)}>
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
                     )}
                   </TableCell>
                 </TableRow>

@@ -5,9 +5,21 @@ import { DepartmentDashboardClient } from '@/components/department/DepartmentDas
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
+import { useStudentData } from '@/hooks/useStudentData';
+import { useMemo } from 'react';
 
 export default function DepartmentDashboardPage() {
   const { currentUser, isLoading } = useAuth();
+  const { departments } = useStudentData();
+
+  const getDepartmentName = (description: string) => {
+    return description.replace(/Offered by\s*/, '');
+  };
+
+  const departmentDetails = useMemo(() => {
+    if (!currentUser || currentUser.role !== 'department') return null;
+    return departments.find(d => d.id === currentUser.departmentId);
+  }, [currentUser, departments]);
 
   if (isLoading) {
     return (
@@ -31,6 +43,8 @@ export default function DepartmentDashboardPage() {
     );
   }
   
+  const welcomeName = departmentDetails ? getDepartmentName(departmentDetails.description) : currentUser.name;
+
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8 p-6 bg-card rounded-xl shadow-lg">
@@ -38,7 +52,7 @@ export default function DepartmentDashboardPage() {
           Department Dashboard
         </h1>
         <p className="text-lg text-muted-foreground">
-          Welcome, {currentUser.name}. Manage student elective approvals and view your student roster.
+          Welcome, {welcomeName}. View your student roster and incoming elective students.
         </p>
       </div>
       <DepartmentDashboardClient currentUser={currentUser} />

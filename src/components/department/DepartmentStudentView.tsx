@@ -2,26 +2,26 @@
 "use client";
 
 import React, { useMemo } from 'react';
-import type { Student, AuthenticatedUser, Department } from '@/types';
+import type { Student, AuthenticatedUser } from '@/types';
 import { useStudentData } from '@/hooks/useStudentData';
-import { DEPARTMENTS_DATA } from '@/lib/constants';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { Check, Clock, Trash2, ArrowRight } from 'lucide-react';
+import { Check, Clock, ArrowRight } from 'lucide-react';
 
 interface DepartmentStudentViewProps {
   currentUser: AuthenticatedUser;
 }
 
 export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProps) {
-  const { students: allStudents, saveStudents, departments } = useStudentData();
-  const { toast } = useToast();
+  const { students: allStudents, departments } = useStudentData();
 
   const departmentMap = useMemo(() => new Map(departments.map(dept => [dept.id, dept.name])), [departments]);
   
+  const getDepartmentName = (description: string) => {
+    return description.replace(/Offered by\s*/, '');
+  };
+
   const currentDepartmentDetails = useMemo(() => {
      if (currentUser.role !== 'department') return null;
      return departments.find(d => d.id === currentUser.departmentId);
@@ -29,40 +29,8 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
 
   const departmentStudents = useMemo(() => {
     if (currentUser.role !== 'department') return [];
-    // Correctly filter students where their home department ID matches the logged-in department user's ID.
     return allStudents.filter(student => student.homeDepartmentId === currentUser.departmentId);
   }, [allStudents, currentUser]);
-
-  const handleApproveStudent = (rollNumber: string) => {
-    const updatedStudents = allStudents.map(student => {
-      if (student.rollNumber === rollNumber) {
-        return { ...student, status: 'approved' as const };
-      }
-      return student;
-    });
-
-    saveStudents(updatedStudents);
-
-    toast({
-      title: "Student Approved",
-      description: `Student with roll number ${rollNumber} has been approved and can now log in.`,
-    });
-  };
-
-  const handleDeleteStudent = (rollNumber: string) => {
-    const updatedStudents = allStudents.filter(student => student.rollNumber !== rollNumber);
-    saveStudents(updatedStudents);
-    toast({
-        title: "Registration Removed",
-        description: `The registration for student ${rollNumber} has been removed.`,
-        variant: "destructive"
-    });
-  };
-  
-  const getDepartmentName = (description: string) => {
-    return description.replace(/Offered by\s*/, '');
-  };
-
 
   if (currentUser.role !== 'department') return null;
 
@@ -71,7 +39,7 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
       <CardHeader>
         <CardTitle>Department Student Roster</CardTitle>
         <CardDescription>
-          Approve new student registrations and view all students registered in the {currentDepartmentDetails ? getDepartmentName(currentDepartmentDetails.description) : currentUser.name}.
+          View all students registered in the {currentDepartmentDetails ? getDepartmentName(currentDepartmentDetails.description) : currentUser.name}. Student approvals are handled by the Admin.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -86,7 +54,6 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
                 <TableHead>Last %</TableHead>
                 <TableHead>Assigned Elective</TableHead>
                 <TableHead>Registration Status</TableHead>
-                <TableHead className="text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -115,18 +82,6 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
                       }
                       {studentStatus.charAt(0).toUpperCase() + studentStatus.slice(1)}
                     </Badge>
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    {studentStatus === 'pending' && (
-                      <>
-                        <Button size="sm" onClick={() => handleApproveStudent(student.rollNumber)}>
-                          Approve
-                        </Button>
-                        <Button variant="destructive" size="sm" onClick={() => handleDeleteStudent(student.rollNumber)}>
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </>
-                    )}
                   </TableCell>
                 </TableRow>
               )})}
