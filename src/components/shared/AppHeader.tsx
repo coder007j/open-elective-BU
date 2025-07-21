@@ -26,9 +26,9 @@ export function AppHeader() {
 
   const getDisplayName = () => {
     if (!currentUser) return "";
+    // This logic is now simplified. The name is correctly set during login.
     if (currentUser.role === 'department') {
-        // Extracts "Dept. of X" from "Offered by Dept. of X"
-        return `${currentUser.name.replace(/Offered by\s*/, '')} Head`;
+        return currentUser.name;
     }
     return `${currentUser.name} (${currentUser.rollNumber})`;
   };

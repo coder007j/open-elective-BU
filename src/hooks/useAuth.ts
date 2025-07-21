@@ -62,10 +62,14 @@ export function useAuth(): UseAuthReturn {
     if (deptUserToAuth && deptUserToAuth.password === passwordAttempt) {
         const departmentDetails = departments.find(d => d.id === deptUserToAuth.departmentId);
         
+        // This is the definitive fix. We construct the correct name here.
+        const departmentDisplayName = departmentDetails 
+            ? `${departmentDetails.description.replace(/Offered by\s*/, '')} Head`
+            : `${deptUserToAuth.name} Head`;
+
         const departmentUser: AuthenticatedUser = {
             rollNumber: deptUserToAuth.id,
-            // Set the name from the full department description for correct display
-            name: departmentDetails ? departmentDetails.description : deptUserToAuth.name,
+            name: departmentDisplayName, // Set the correctly formatted name.
             departmentId: deptUserToAuth.departmentId,
             role: 'department',
         };
