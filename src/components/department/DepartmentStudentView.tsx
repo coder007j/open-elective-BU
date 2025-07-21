@@ -2,19 +2,22 @@
 "use client";
 
 import React, { useMemo } from 'react';
-import type { Student, AuthenticatedUser } from '@/types';
+import type { AuthenticatedUser } from '@/types';
 import { useStudentData } from '@/hooks/useStudentData';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Check, Clock, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Check, Clock, ArrowRight, Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface DepartmentStudentViewProps {
   currentUser: AuthenticatedUser;
 }
 
 export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProps) {
-  const { students: allStudents, departments } = useStudentData();
+  const { students: allStudents, departments, saveStudents } = useStudentData();
+  const { toast } = useToast();
 
   const departmentMap = useMemo(() => new Map(departments.map(dept => [dept.id, dept.name])), [departments]);
   
@@ -32,14 +35,39 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
     return allStudents.filter(student => student.homeDepartmentId === currentUser.departmentId);
   }, [allStudents, currentUser]);
 
+  const handleApproveStudent = (rollNumber: string) => {
+    const updatedStudents = allStudents.map(student => {
+      if (student.rollNumber === rollNumber) {
+        return { ...student, status: 'approved' as const };
+      }
+      return student;
+    });
+    saveStudents(updatedStudents);
+    toast({
+      title: "Student Approved",
+      description: `Student ${rollNumber} can now log in and select electives.`,
+    });
+  };
+
+  const handleDeleteStudent = (rollNumber: string) => {
+    const updatedStudents = allStudents.filter(student => student.rollNumber !== rollNumber);
+    saveStudents(updatedStudents);
+    toast({
+        title: "Registration Removed",
+        description: `The registration for student ${rollNumber} has been removed.`,
+        variant: "destructive"
+    });
+  };
+
   if (currentUser.role !== 'department') return null;
+  const welcomeName = currentDepartmentDetails ? getDepartmentName(currentDepartmentDetails.description) : currentUser.name;
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Department Student Roster</CardTitle>
         <CardDescription>
-          View all students registered in the {currentDepartmentDetails ? getDepartmentName(currentDepartmentDetails.description) : currentUser.name}. Student approvals are handled by the Admin.
+          Approve new registrations for students in the {welcomeName}.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -51,9 +79,9 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
               <TableRow>
                 <TableHead>Roll Number</TableHead>
                 <TableHead>Name</TableHead>
-                <TableHead>Last %</TableHead>
-                <TableHead>Assigned Elective</TableHead>
                 <TableHead>Registration Status</TableHead>
+                <TableHead>Assigned Elective</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -63,8 +91,16 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
                 <TableRow key={student.rollNumber}>
                   <TableCell className="font-medium">{student.rollNumber}</TableCell>
                   <TableCell>{student.name}</TableCell>
-                  <TableCell>{student.lastSemesterPercentage?.toFixed(1)}%</TableCell>
                    <TableCell>
+                    <Badge variant={studentStatus === 'approved' ? 'default' : 'secondary'}>
+                      {studentStatus === 'approved' ? 
+                        <Check className="mr-2 h-4 w-4" /> :
+                        <Clock className="mr-2 h-4 w-4" />
+                      }
+                      {studentStatus.charAt(0).toUpperCase() + studentStatus.slice(1)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
                     {student.assignedElective ? (
                       <Badge variant="outline" className="flex items-center gap-2">
                         <ArrowRight className="h-3 w-3" />
@@ -74,14 +110,17 @@ export function DepartmentStudentView({ currentUser }: DepartmentStudentViewProp
                       <span className="text-muted-foreground">None</span>
                     )}
                   </TableCell>
-                  <TableCell>
-                    <Badge variant={studentStatus === 'approved' ? 'default' : 'secondary'}>
-                      {studentStatus === 'approved' ? 
-                        <Check className="mr-2 h-4 w-4" /> :
-                        <Clock className="mr-2 h-4 w-4" />
-                      }
-                      {studentStatus.charAt(0).toUpperCase() + studentStatus.slice(1)}
-                    </Badge>
+                   <TableCell className="text-right space-x-2">
+                    {studentStatus === 'pending' && (
+                      <>
+                        <Button size="sm" onClick={() => handleApproveStudent(student.rollNumber)}>
+                           <Check className="mr-2 h-4 w-4" /> Approve
+                        </Button>
+                         <Button variant="destructive" size="sm" onClick={() => handleDeleteStudent(student.rollNumber)}>
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
                   </TableCell>
                 </TableRow>
               )})}
