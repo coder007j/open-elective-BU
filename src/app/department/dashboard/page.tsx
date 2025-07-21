@@ -12,8 +12,8 @@ export default function DepartmentDashboardPage() {
   const { currentUser, isLoading } = useAuth();
   const { departments } = useStudentData();
 
-  const getDepartmentName = (description: string) => {
-    // This function will now correctly return the full description.
+  const getDepartmentNameFromDescription = (description: string) => {
+    // Extracts the name from "Offered by Dept. of X"
     return description.replace(/Offered by\s*/, '');
   };
 
@@ -44,8 +44,8 @@ export default function DepartmentDashboardPage() {
     );
   }
   
-  // Use the full description for the welcome name
-  const welcomeName = departmentDetails ? getDepartmentName(departmentDetails.description) : currentUser.name;
+  // Use the full description from the found department details for the welcome name
+  const welcomeName = departmentDetails ? getDepartmentNameFromDescription(departmentDetails.description) : currentUser.name;
 
   return (
     <div className="container mx-auto py-8 px-4">
