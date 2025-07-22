@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { Department } from '@/types';
 import { DepartmentCard } from './DepartmentCard';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,12 @@ export function ElectiveSelectionClient() {
       setSelectedPreferences(currentUser.preferences);
     }
   }, [currentUser?.preferences]);
+
+  const availableDepartments = useMemo(() => {
+    if (!currentUser || currentUser.role !== 'student') return [];
+    // Filter out the elective from the student's own home department
+    return departments.filter(dept => dept.id !== currentUser.homeDepartmentId);
+  }, [departments, currentUser]);
 
   const handleSelectDepartment = (departmentId: string) => {
     setSelectedPreferences(prev => {
@@ -117,7 +123,7 @@ export function ElectiveSelectionClient() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {departments.map(dept => (
+        {availableDepartments.map(dept => (
           <DepartmentCard
             key={dept.id}
             department={dept}
