@@ -16,7 +16,9 @@ export function StudentManager() {
   const { students, saveStudents, departments } = useStudentData();
   const { toast } = useToast();
 
-  const departmentMap = useMemo(() => new Map(departments.map(dept => [dept.id, dept.name])), [departments]);
+  const departmentMap = useMemo(() => 
+    new Map(departments.map(dept => [dept.id, { name: dept.name, description: dept.description.replace(/Offered by\s*/, '') }]))
+  , [departments]);
 
   const groupedStudents = useMemo(() => {
     return students.reduce((acc, student) => {
@@ -29,8 +31,8 @@ export function StudentManager() {
     }, {} as Record<string, Student[]>);
   }, [students]);
   
-  const getDepartmentName = (id: string) => {
-    return departmentMap.get(id) || id.toUpperCase();
+  const getDepartmentDetails = (id: string) => {
+    return departmentMap.get(id) || { name: id.toUpperCase(), description: 'Unknown Department' };
   };
 
   const handleDeleteStudent = (rollNumber: string) => {
@@ -54,10 +56,15 @@ export function StudentManager() {
            <p className="text-center text-muted-foreground py-8">No students have registered yet.</p>
         ) : (
           <Accordion type="multiple" className="w-full">
-            {Object.entries(groupedStudents).map(([deptId, studentList]) => (
+            {Object.entries(groupedStudents).map(([deptId, studentList]) => {
+              const deptDetails = getDepartmentDetails(deptId);
+              return (
               <AccordionItem value={deptId} key={deptId}>
                 <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                  {getDepartmentName(deptId)} ({studentList.length} students)
+                  <div className="flex flex-col text-left">
+                     <span>{deptDetails.description}</span>
+                     <span className="text-sm font-normal text-muted-foreground">{deptDetails.name} ({studentList.length} students)</span>
+                  </div>
                 </AccordionTrigger>
                 <AccordionContent>
                   <Table>
@@ -100,7 +107,7 @@ export function StudentManager() {
                   </Table>
                 </AccordionContent>
               </AccordionItem>
-            ))}
+            )})}
           </Accordion>
         )}
       </CardContent>
