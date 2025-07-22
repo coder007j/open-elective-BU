@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import * as LucideIcons from 'lucide-react';
 import { CustomAcademicCapIcon } from '@/components/icons/CustomAcademicCapIcon';
 import { cn } from '@/lib/utils';
-import { CheckCircle2, Circle, BookOpen } from 'lucide-react';
+import { CheckCircle2, Circle, BookOpen, FileWarning } from 'lucide-react';
 
 interface DepartmentCardProps {
   department: Department;
@@ -30,6 +30,8 @@ const IconComponent = ({ name, ...props }: {name: Department['iconName']} & Luci
 
 export function DepartmentCard({ department, isSelected, onSelect, isDisabled }: DepartmentCardProps) {
   const availableSlots = department.capacity - department.assignedStudents.length;
+  const hasSyllabus = department.syllabus && department.syllabus.length > 0 && !department.syllabus.includes('to be updated');
+  const isPdfSyllabus = hasSyllabus && department.syllabus.startsWith('data:application/pdf');
 
   return (
     <Card 
@@ -71,22 +73,40 @@ export function DepartmentCard({ department, isSelected, onSelect, isDisabled }:
       <CardFooter className="pt-0 border-t mt-auto p-3">
          <Dialog>
           <DialogTrigger asChild>
-            <Button variant="secondary" size="sm" className="w-full">
+            <Button variant="secondary" size="sm" className="w-full" disabled={!hasSyllabus}>
               <BookOpen className="mr-2 h-4 w-4" />
-              View Syllabus
+              {hasSyllabus ? 'View Syllabus' : 'Syllabus Unavailable'}
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-2xl max-h-[80vh]">
+          <DialogContent className="sm:max-w-4xl h-[90vh]">
             <DialogHeader>
               <DialogTitle>{department.name} - Syllabus</DialogTitle>
               <DialogDescription>
                 This is the syllabus for the {department.name} elective.
               </DialogDescription>
             </DialogHeader>
-            <div className="prose dark:prose-invert prose-sm max-w-none overflow-y-auto p-1 bg-muted/50 rounded-md">
-              <pre className="whitespace-pre-wrap font-body text-sm text-foreground p-4">
-                {department.syllabus || "No syllabus has been provided for this elective yet."}
-              </pre>
+            <div className="h-full w-full">
+               {isPdfSyllabus ? (
+                <iframe 
+                    src={department.syllabus}
+                    className="w-full h-full border rounded-md"
+                    title={`${department.name} Syllabus`}
+                />
+               ) : (
+                 hasSyllabus ? (
+                    <div className="prose dark:prose-invert prose-sm max-w-none overflow-y-auto p-1 bg-muted/50 rounded-md h-full">
+                        <pre className="whitespace-pre-wrap font-body text-sm text-foreground p-4">
+                            {department.syllabus}
+                        </pre>
+                    </div>
+                 ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center bg-muted/50 rounded-md">
+                        <FileWarning className="h-12 w-12 text-muted-foreground mb-4" />
+                        <p className="text-lg font-semibold">Syllabus Not Available</p>
+                        <p className="text-sm text-muted-foreground">A syllabus has not been provided for this elective yet.</p>
+                    </div>
+                 )
+               )}
             </div>
           </DialogContent>
         </Dialog>

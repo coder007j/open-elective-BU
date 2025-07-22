@@ -5,20 +5,29 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { Department, AuthenticatedUser } from '@/types';
 import { useStudentData } from '@/hooks/useStudentData';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2, Save, FileUp, FileText } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+const MAX_FILE_SIZE = 5000000; // 5MB
+const ACCEPTED_FILE_TYPES = ["application/pdf"];
 
 const electiveSchema = z.object({
   capacity: z.coerce.number().int().positive({ message: "Capacity must be a positive number." }),
-  syllabus: z.string().min(10, { message: "Syllabus must be at least 10 characters." }),
+  syllabusFile: z
+    .any()
+    .refine((files) => files?.length <= 1, "Only one file can be uploaded.")
+    .refine((files) => !files || files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+    .refine(
+      (files) => !files || ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
+      ".pdf files are accepted."
+    ).optional(),
 });
 
 type ElectiveFormValues = z.infer<typeof electiveSchema>;
@@ -26,6 +35,14 @@ type ElectiveFormValues = z.infer<typeof electiveSchema>;
 interface ElectiveManagerProps {
   currentUser: AuthenticatedUser;
 }
+
+// Helper to convert file to Base64 Data URI
+const toBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = error => reject(error);
+});
 
 export function ElectiveManager({ currentUser }: ElectiveManagerProps) {
   const { departments, saveDepartments } = useStudentData();
@@ -45,26 +62,35 @@ export function ElectiveManager({ currentUser }: ElectiveManagerProps) {
     if (myElective) {
       form.reset({
         capacity: myElective.capacity || 0,
-        syllabus: myElective.syllabus || "",
       });
     }
   }, [myElective, form]);
 
-  const handleFormSubmit = (values: ElectiveFormValues) => {
+  const handleFormSubmit = async (values: ElectiveFormValues) => {
     if (!myElective) {
       toast({ title: "Error", description: "Could not find your department's elective.", variant: "destructive" });
       return;
     }
     setIsLoading(true);
 
+    let syllabusData = myElective.syllabus; // Keep old syllabus if no new file
+    if (values.syllabusFile && values.syllabusFile.length > 0) {
+        const file = values.syllabusFile[0];
+        syllabusData = await toBase64(file);
+    }
+    
     const updatedDepartments = departments.map(d =>
-      d.id === myElective.id ? { ...d, ...values } : d
+      d.id === myElective.id ? { ...d, capacity: values.capacity, syllabus: syllabusData } : d
     );
     saveDepartments(updatedDepartments);
     
     setTimeout(() => {
         toast({ title: "Elective Updated", description: `Your elective details have been saved successfully.` });
         setIsLoading(false);
+        form.reset({
+            capacity: values.capacity,
+            syllabusFile: undefined
+        });
     }, 500); // Simulate network delay
   };
 
@@ -80,6 +106,8 @@ export function ElectiveManager({ currentUser }: ElectiveManagerProps) {
       </Card>
     );
   }
+
+  const hasPdfSyllabus = myElective.syllabus.startsWith('data:application/pdf');
 
   return (
     <Card className="shadow-lg">
@@ -105,14 +133,27 @@ export function ElectiveManager({ currentUser }: ElectiveManagerProps) {
             />
             <FormField
               control={form.control}
-              name="syllabus"
+              name="syllabusFile"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Syllabus</FormLabel>
+                  <FormLabel>Syllabus (PDF Only)</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Enter the full syllabus for your elective..." {...field} rows={8} />
+                    <Input type="file" accept="application/pdf" {...form.register('syllabusFile')} />
                   </FormControl>
-                  <FormMessage />
+                   <FormMessage />
+                   <div className={cn("text-sm text-muted-foreground mt-2 p-3 rounded-md", hasPdfSyllabus ? 'bg-green-100 dark:bg-green-900/20' : 'bg-muted/50')}>
+                     {hasPdfSyllabus ? (
+                       <div className="flex items-center gap-2">
+                          <FileText className="h-5 w-5 text-green-700 dark:text-green-400" />
+                          <span>A syllabus PDF is currently uploaded. Uploading a new file will replace it.</span>
+                       </div>
+                     ) : (
+                       <div className="flex items-center gap-2">
+                          <FileUp className="h-5 w-5" />
+                          <span>No PDF syllabus uploaded. Please upload a file.</span>
+                       </div>
+                     )}
+                   </div>
                 </FormItem>
               )}
             />
