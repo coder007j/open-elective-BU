@@ -56,6 +56,9 @@ export function ElectiveManager({ currentUser }: ElectiveManagerProps) {
 
   const form = useForm<ElectiveFormValues>({
     resolver: zodResolver(electiveSchema),
+    defaultValues: {
+      capacity: 0,
+    }
   });
   
   useEffect(() => {
@@ -151,7 +154,7 @@ export function ElectiveManager({ currentUser }: ElectiveManagerProps) {
                     <Input type="file" accept="application/pdf" {...form.register('syllabusFile')} />
                   </FormControl>
                    <FormMessage />
-                   <div className={cn("text-sm text-muted-foreground mt-2 p-3 rounded-md", hasPdfSyllabus ? 'bg-green-100 dark:bg-green-900/20' : 'bg-muted/50')}>
+                   <div className={cn("text-sm text-muted-foreground mt-2 p-3 rounded-md", hasPdfSyllylabus ? 'bg-green-100 dark:bg-green-900/20' : 'bg-muted/50')}>
                      {hasPdfSyllabus ? (
                        <div className="flex items-center gap-2">
                           <FileText className="h-5 w-5 text-green-700 dark:text-green-400" />
