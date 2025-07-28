@@ -22,7 +22,7 @@ const electiveSchema = z.object({
   capacity: z.coerce.number().int().positive({ message: "Capacity must be a positive number." }),
   syllabusFile: z
     .any()
-    .refine((files) => files?.length <= 1, "Only one file can be uploaded.")
+    .refine((files) => !files || files?.length <= 1, "Only one file can be uploaded.")
     .refine((files) => !files || files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
       (files) => !files || ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
@@ -76,7 +76,13 @@ export function ElectiveManager({ currentUser }: ElectiveManagerProps) {
     let syllabusData = myElective.syllabus; // Keep old syllabus if no new file
     if (values.syllabusFile && values.syllabusFile.length > 0) {
         const file = values.syllabusFile[0];
-        syllabusData = await toBase64(file);
+        try {
+            syllabusData = await toBase64(file);
+        } catch (error) {
+            toast({ title: "File Read Error", description: "Could not process the uploaded file.", variant: "destructive" });
+            setIsLoading(false);
+            return;
+        }
     }
     
     const updatedDepartments = departments.map(d =>
@@ -84,14 +90,18 @@ export function ElectiveManager({ currentUser }: ElectiveManagerProps) {
     );
     saveDepartments(updatedDepartments);
     
-    setTimeout(() => {
-        toast({ title: "Elective Updated", description: `Your elective details have been saved successfully.` });
-        setIsLoading(false);
-        form.reset({
-            capacity: values.capacity,
-            syllabusFile: undefined
-        });
-    }, 500); // Simulate network delay
+    toast({ title: "Elective Updated", description: `Your elective details have been saved successfully.` });
+    setIsLoading(false);
+    
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    if (fileInput) {
+        fileInput.value = '';
+    }
+
+    form.reset({
+        capacity: values.capacity,
+        syllabusFile: undefined
+    });
   };
 
   if (!myElective) {
@@ -107,7 +117,7 @@ export function ElectiveManager({ currentUser }: ElectiveManagerProps) {
     );
   }
 
-  const hasPdfSyllabus = myElective.syllabus.startsWith('data:application/pdf');
+  const hasPdfSyllabus = myElective.syllabus && myElective.syllabus.startsWith('data:application/pdf');
 
   return (
     <Card className="shadow-lg">
