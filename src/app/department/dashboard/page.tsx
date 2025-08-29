@@ -48,7 +48,7 @@ export default function DepartmentDashboardPage() {
   const welcomeName = departmentDetails ? getDepartmentNameFromDescription(departmentDetails.description) : currentUser.name;
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <div className="mb-8 p-6 bg-card rounded-xl shadow-lg">
         <h1 className="text-4xl font-bold font-headline text-primary mb-2">
           Department Dashboard
