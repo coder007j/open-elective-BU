@@ -50,7 +50,7 @@ export function RegistrationForm() {
       rollNumber: "",
       name: "",
       password: "",
-      semester: 1,
+      semester: 3,
       lastSemesterPercentage: 40,
     }
   });
@@ -74,7 +74,7 @@ export function RegistrationForm() {
         name: "",
         password: "",
         homeDepartmentId: undefined,
-        semester: 1,
+        semester: 3,
         lastSemesterPercentage: 40,
       });
     } else {

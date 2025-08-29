@@ -11,7 +11,7 @@ import { MAX_PREFERENCES } from '@/lib/constants';
 import { useStudentData } from '@/hooks/useStudentData';
 import { AssignmentResultDisplay } from './AssignmentResultDisplay';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info, Loader2, Send, Clock } from 'lucide-react';
+import { Info, Loader2, Send, Clock, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function ElectiveSelectionClient() {
@@ -70,6 +70,25 @@ export function ElectiveSelectionClient() {
   };
 
   if (!currentUser) return <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />;
+
+  // Case 0: Student is not eligible (not in 3rd semester)
+  if (currentUser.role === 'student' && currentUser.semester !== 3) {
+     return (
+      <Card className="w-full max-w-2xl mx-auto shadow-lg bg-card">
+        <CardHeader className="items-center text-center">
+          <AlertTriangle className="h-16 w-16 text-destructive mb-4" />
+          <CardTitle className="text-2xl font-headline text-destructive">Not Eligible for Elective Selection</CardTitle>
+          <CardDescription>
+            Only students in the 3rd semester are eligible to participate in the open elective allocation process.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="text-center">
+          <p>Your current registered semester is: <span className="font-bold">{currentUser.semester}</span>.</p>
+          <p className="mt-4 text-sm text-muted-foreground">If you believe this is an error, please contact the administration to have your details updated.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // Case 1: Student has a final, assigned assignment
   if (currentUser.assignedElective) {
