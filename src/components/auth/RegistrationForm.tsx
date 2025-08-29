@@ -28,7 +28,7 @@ import { useStudentData } from '@/hooks/useStudentData';
 import type { RegistrationData } from '@/types';
 
 const registrationFormSchema = z.object({
-  rollNumber: z.string().min(1, { message: "Roll number is required." }),
+  rollNumber: z.string().length(14, { message: "Roll number must be exactly 14 characters." }),
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
   homeDepartmentId: z.string({ required_error: "Please select your home department." }),
@@ -96,7 +96,7 @@ export function RegistrationForm() {
             <FormItem>
               <FormLabel>Roll Number</FormLabel>
               <FormControl>
-                <Input placeholder="Your unique roll number" {...field} />
+                <Input placeholder="Your unique 14-character roll number" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
