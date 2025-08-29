@@ -35,8 +35,8 @@ export default function LoginPage() {
   return (
     <main 
       className="flex flex-1 flex-col items-center justify-center p-6 bg-cover bg-center"
-      style={{ backgroundImage: "url('https://picsum.photos/1920/1080?grayscale&blur=2')" }}
-      data-ai-hint="university campus"
+      style={{ backgroundImage: "url('https://picsum.photos/seed/students/1920/1080')" }}
+      data-ai-hint="university students"
     >
       <div className="absolute inset-0 bg-black/50 z-0" />
       <div className="z-10 w-full">
