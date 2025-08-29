@@ -50,7 +50,7 @@ export function LoginTabs() {
             <p className="text-sm text-center text-muted-foreground mb-4">
               Enter your student credentials to select your electives.
             </p>
-            <LoginForm />
+            <LoginForm showForgotPassword={true} />
           </TabsContent>
            <TabsContent value="department" className="pt-4">
             <p className="text-sm text-center text-muted-foreground mb-4">

@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import type { Student, Department, RegistrationData, DepartmentUser } from '@/types';
+import type { Student, Department, RegistrationData, DepartmentUser, ChangePasswordData } from '@/types';
 import { MOCK_STUDENTS, DEPARTMENTS_DATA, MOCK_DEPARTMENT_USERS } from '@/lib/constants';
 
 const ALL_STUDENTS_STORAGE_KEY = 'allStudentsData';
@@ -123,19 +123,24 @@ export function useStudentData() {
         saveStudents(currentStudents);
         return { success: true, message: 'Request submitted.' };
     }
-
+    
+    // Only check students for forgot password, not department users
+    return { success: false, message: 'No student found with that Roll Number.' };
+  }, [saveStudents]);
+  
+  const changeDepartmentPassword = useCallback(async (data: ChangePasswordData): Promise<{ success: boolean; message: string; }> => {
     const currentDeptUsers: DepartmentUser[] = JSON.parse(localStorage.getItem(ALL_DEPT_USERS_STORAGE_KEY) || '[]');
-    const deptUserIndex = currentDeptUsers.findIndex(u => u.id === id);
+    const deptUserIndex = currentDeptUsers.findIndex(u => u.id === data.userId);
 
     if (deptUserIndex !== -1) {
-        currentDeptUsers[deptUserIndex].passwordResetRequested = true;
+        currentDeptUsers[deptUserIndex].password = data.newPassword;
         saveDepartmentUsers(currentDeptUsers);
-        return { success: true, message: 'Request submitted.' };
+        return { success: true, message: 'Password updated successfully.' };
     }
 
-    return { success: false, message: 'No user found with that ID.' };
-  }, [saveStudents, saveDepartmentUsers]);
+    return { success: false, message: 'Could not find department user.' };
+  }, [saveDepartmentUsers]);
 
 
-  return { students, saveStudents, departments, saveDepartments, registerStudent, departmentUsers, saveDepartmentUsers, requestPasswordReset };
+  return { students, saveStudents, departments, saveDepartments, registerStudent, departmentUsers, saveDepartmentUsers, requestPasswordReset, changeDepartmentPassword };
 }

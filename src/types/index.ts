@@ -87,3 +87,8 @@ export interface AssignElectivesOutput {
     reason?: string;
   }[];
 }
+
+export interface ChangePasswordData {
+    userId: string;
+    newPassword: string;
+}

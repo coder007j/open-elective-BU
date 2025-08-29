@@ -33,7 +33,11 @@ const resetRequestSchema = z.object({
 });
 type ResetRequestValues = z.infer<typeof resetRequestSchema>;
 
-export function LoginForm() {
+interface LoginFormProps {
+  showForgotPassword?: boolean;
+}
+
+export function LoginForm({ showForgotPassword = false }: LoginFormProps) {
   const { login } = useAuth();
   const { requestPasswordReset } = useStudentData();
   const { toast } = useToast();
@@ -137,43 +141,45 @@ export function LoginForm() {
             </FormItem>
           )}
         />
-        <div className="flex items-center justify-between">
-            <Dialog open={isResetFormOpen} onOpenChange={setResetFormOpen}>
-                <DialogTrigger asChild>
-                    <Button type="button" variant="link" className="p-0 h-auto text-sm">Forgot Password?</Button>
-                </DialogTrigger>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Request Password Reset</DialogTitle>
-                        <DialogDescription>
-                            Enter your ID below. A request will be sent to the administrator to reset your password.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <Form {...resetForm}>
-                        <form onSubmit={resetForm.handleSubmit(onResetRequestSubmit)} className="space-y-4 py-4">
-                             <FormField
-                                control={resetForm.control}
-                                name="id"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Your Student Roll Number or Department ID</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Enter your ID" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                                />
-                             <DialogFooter>
-                                <DialogClose asChild>
-                                <Button type="button" variant="outline">Cancel</Button>
-                                </DialogClose>
-                                <Button type="submit">Submit Request</Button>
-                            </DialogFooter>
-                        </form>
-                    </Form>
-                </DialogContent>
-            </Dialog>
+        <div className="flex items-center justify-end h-6">
+            {showForgotPassword && (
+                 <Dialog open={isResetFormOpen} onOpenChange={setResetFormOpen}>
+                    <DialogTrigger asChild>
+                        <Button type="button" variant="link" className="p-0 h-auto text-sm">Forgot Password?</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Request Password Reset</DialogTitle>
+                            <DialogDescription>
+                                Enter your ID below. A request will be sent to the administrator to reset your password.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Form {...resetForm}>
+                            <form onSubmit={resetForm.handleSubmit(onResetRequestSubmit)} className="space-y-4 py-4">
+                                <FormField
+                                    control={resetForm.control}
+                                    name="id"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                        <FormLabel>Your Student Roll Number</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Enter your Roll Number" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}
+                                    />
+                                <DialogFooter>
+                                    <DialogClose asChild>
+                                    <Button type="button" variant="outline">Cancel</Button>
+                                    </DialogClose>
+                                    <Button type="submit">Submit Request</Button>
+                                </DialogFooter>
+                            </form>
+                        </Form>
+                    </DialogContent>
+                </Dialog>
+            )}
         </div>
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
