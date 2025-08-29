@@ -45,7 +45,10 @@ export function AppHeader() {
       <div className="container flex h-16 items-center justify-between">
         <Link href={homeLink} className="flex items-center gap-2">
            <CustomAcademicCapIcon size={32} className="text-primary" />
-          <h1 className="text-2xl font-bold font-headline text-primary">Open Elective</h1>
+           <div className="flex flex-col">
+            <h1 className="text-xl font-bold font-headline text-primary leading-tight">Automation of Open Elective</h1>
+            <p className="text-xs text-muted-foreground leading-tight">(Bangalore University)</p>
+           </div>
         </Link>
         <div className="flex items-center gap-4">
           {currentUser && (

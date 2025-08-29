@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, UserPlus } from "lucide-react";
+import { Loader2, UserPlus, Eye, EyeOff } from "lucide-react";
 import { useStudentData } from '@/hooks/useStudentData';
 import type { RegistrationData } from '@/types';
 
@@ -32,16 +32,17 @@ const registrationFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
   homeDepartmentId: z.string({ required_error: "Please select your home department." }),
-  semester: z.coerce.number().min(1).max(8),
-  lastSemesterPercentage: z.coerce.number().min(0, "Percentage must be at least 0.").max(100, "Percentage cannot be more than 100."),
+  semester: z.coerce.number().min(1).max(4, "Please select a valid semester."),
+  lastSemesterPercentage: z.coerce.number().min(40, "Percentage must be at least 40.").max(100, "Percentage cannot be more than 100."),
 });
 
 type RegistrationFormValues = z.infer<typeof registrationFormSchema>;
 
 export function RegistrationForm() {
   const { toast } = useToast();
-  const { registerStudent, departments } = useStudentData(); // Use dynamic departments
+  const { registerStudent, departments } = useStudentData();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<RegistrationFormValues>({
     resolver: zodResolver(registrationFormSchema),
@@ -50,7 +51,7 @@ export function RegistrationForm() {
       name: "",
       password: "",
       semester: 1,
-      lastSemesterPercentage: 0,
+      lastSemesterPercentage: 40,
     }
   });
   
@@ -74,7 +75,7 @@ export function RegistrationForm() {
         password: "",
         homeDepartmentId: undefined,
         semester: 1,
-        lastSemesterPercentage: 0,
+        lastSemesterPercentage: 40,
       });
     } else {
       toast({
@@ -120,9 +121,24 @@ export function RegistrationForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="Choose a secure password" {...field} />
-              </FormControl>
+              <div className="relative">
+                <FormControl>
+                  <Input 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="Choose a secure password" 
+                    {...field}
+                    className="pr-10"
+                  />
+                </FormControl>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -162,7 +178,7 @@ export function RegistrationForm() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {Array.from({ length: 8 }, (_, i) => i + 1).map(sem => (
+                  {Array.from({ length: 4 }, (_, i) => i + 1).map(sem => (
                     <SelectItem key={sem} value={String(sem)}>{sem}</SelectItem>
                   ))}
                 </SelectContent>

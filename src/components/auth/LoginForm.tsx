@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { KeyRound, Loader2, UserCircle } from "lucide-react";
+import { KeyRound, Loader2, UserCircle, Eye, EyeOff } from "lucide-react";
 import React from "react";
 
 const loginFormSchema = z.object({
@@ -30,6 +30,7 @@ export function LoginForm() {
   const { login } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
@@ -84,8 +85,21 @@ export function LoginForm() {
                <div className="relative">
                 <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <FormControl>
-                  <Input type="password" placeholder="Enter your password" {...field} className="pl-10" />
+                  <Input 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="Enter your password" 
+                    {...field} 
+                    className="pl-10 pr-10" 
+                  />
                 </FormControl>
+                 <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
               <FormMessage />
             </FormItem>
