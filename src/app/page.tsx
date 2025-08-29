@@ -39,7 +39,7 @@ export default function LoginPage() {
       data-ai-hint="university students"
     >
       <div className="absolute inset-0 bg-black/50 z-0" />
-      <div className="z-10 w-full">
+      <div className="z-10 w-full flex items-center justify-center">
         <LoginTabs />
       </div>
     </main>
