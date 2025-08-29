@@ -4,11 +4,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import type { AuthenticatedUser, Student, DepartmentUser, RegistrationData, Department } from '@/types';
-import { MOCK_STUDENTS, MOCK_DEPARTMENT_USERS, DEPARTMENTS_DATA } from '@/lib/constants';
+import { MOCK_STUDENTS, DEPARTMENTS_DATA } from '@/lib/constants';
 import { useStudentData } from './useStudentData';
 
 const AUTH_STORAGE_KEY = 'openElectiveUser';
 const ALL_STUDENTS_STORAGE_KEY = 'allStudentsData';
+const ALL_DEPT_USERS_STORAGE_KEY = 'allDeptUsersData';
 
 
 interface UseAuthReturn {
@@ -16,16 +17,14 @@ interface UseAuthReturn {
   isLoading: boolean;
   login: (rollNumber: string, passwordAttempt: string) => Promise<void>;
   logout: () => void;
-  register: (data: RegistrationData) => Promise<{ success: boolean; message: string; }>;
   savePreferences: (preferences: string[]) => void;
-  updateUserAssignment: (assignedElectiveId: string | null, reason: string | null) => void;
 }
 
 export function useAuth(): UseAuthReturn {
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const { students: allStudents, registerStudent, departments } = useStudentData();
+  const { students: allStudents, departments, departmentUsers } = useStudentData();
 
   useEffect(() => {
     try {
@@ -33,12 +32,6 @@ export function useAuth(): UseAuthReturn {
       if (storedUser) {
         setCurrentUser(JSON.parse(storedUser));
       }
-      
-      const studentsData = localStorage.getItem(ALL_STUDENTS_STORAGE_KEY);
-      if (!studentsData) {
-         localStorage.setItem(ALL_STUDENTS_STORAGE_KEY, JSON.stringify(MOCK_STUDENTS));
-      }
-
     } catch (error) {
       console.error("Failed to load user from localStorage", error);
       localStorage.removeItem(AUTH_STORAGE_KEY);
@@ -58,18 +51,17 @@ export function useAuth(): UseAuthReturn {
     }
 
     // Department Login
-    const deptUserToAuth = MOCK_DEPARTMENT_USERS.find(d => d.id === rollNumber);
+    const deptUserToAuth = departmentUsers.find(d => d.id === rollNumber);
     if (deptUserToAuth && deptUserToAuth.password === passwordAttempt) {
         const departmentDetails = departments.find(d => d.id === deptUserToAuth.departmentId);
         
-        // This is the definitive fix. Set the name to the department's description field.
         const departmentDisplayName = departmentDetails 
             ? departmentDetails.description.replace(/Offered by\s*/, '')
             : deptUserToAuth.name;
 
         const departmentUser: AuthenticatedUser = {
             rollNumber: deptUserToAuth.id,
-            name: departmentDisplayName, // Set the correctly formatted name.
+            name: departmentDisplayName,
             departmentId: deptUserToAuth.departmentId,
             role: 'department',
         };
@@ -99,17 +91,13 @@ export function useAuth(): UseAuthReturn {
     }
 
     throw new Error("Invalid credentials. Please check and try again.");
-  }, [router, allStudents, departments]);
+  }, [router, allStudents, departments, departmentUsers]);
 
   const logout = useCallback(() => {
     localStorage.removeItem(AUTH_STORAGE_KEY);
     setCurrentUser(null);
     router.push('/'); 
   }, [router]);
-  
-  const register = useCallback(async (data: RegistrationData): Promise<{ success: boolean; message: string; }> => {
-    return registerStudent(data);
-  }, [registerStudent]);
 
   const savePreferences = useCallback((preferences: string[]) => {
     setCurrentUser(prevUser => {
@@ -145,18 +133,5 @@ export function useAuth(): UseAuthReturn {
     });
   }, []);
 
-  const updateUserAssignment = useCallback((assignedElectiveId: string | null, reason: string | null) => {
-    setCurrentUser(prevUser => {
-      if (!prevUser || prevUser.role !== 'student') return prevUser;
-      const updatedUser: AuthenticatedUser = {
-        ...prevUser,
-        assignedElective: assignedElectiveId,
-        assignmentReason: reason,
-      };
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedUser));
-      return updatedUser;
-    });
-  }, []);
-
-  return { currentUser, isLoading, login, logout, register, savePreferences, updateUserAssignment };
+  return { currentUser, isLoading, login, logout, savePreferences };
 }

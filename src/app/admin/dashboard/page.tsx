@@ -38,7 +38,7 @@ export default function AdminDashboardPage() {
           Admin Dashboard
         </h1>
         <p className="text-lg text-muted-foreground">
-          Manage student data, departments, and approvals.
+          Manage allocations, users, departments, and password requests.
         </p>
       </div>
       <AdminDashboardClient currentUser={currentUser} />

@@ -14,7 +14,7 @@ export interface Department {
 
 export interface Student {
   rollNumber: string;
-  password?: string; // For mock login, not stored long-term securely this way
+  password?: string;
   name: string;
   homeDepartmentId: string;
   semester: number;
@@ -25,6 +25,7 @@ export interface Student {
   assignmentReason: string | null;
   homeDeptApproval: boolean;
   electiveDeptApproval: boolean;
+  passwordResetRequested: boolean;
 }
 
 export interface DepartmentUser {
@@ -32,9 +33,10 @@ export interface DepartmentUser {
   password?: string;
   name: string;
   departmentId: string;
+  passwordResetRequested: boolean;
 }
 
-export type RegistrationData = Omit<Student, 'preferences' | 'assignedElective' | 'assignmentReason' | 'status' | 'homeDeptApproval' | 'electiveDeptApproval'>;
+export type RegistrationData = Omit<Student, 'preferences' | 'assignedElective' | 'assignmentReason' | 'status' | 'homeDeptApproval' | 'electiveDeptApproval' | 'passwordResetRequested'>;
 
 
 export interface AssignmentResult {

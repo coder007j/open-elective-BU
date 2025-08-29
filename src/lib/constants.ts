@@ -58,17 +58,17 @@ export const DEPARTMENTS_DATA: Department[] = [
 
 
 export const MOCK_STUDENTS: Student[] = [
-  { rollNumber: 'user123', name: 'Alice Smith', password: 'password123', homeDepartmentId: 'physics', semester: 5, lastSemesterPercentage: 88.5, status: 'approved', preferences: [], assignedElective: null, assignmentReason: null, homeDeptApproval: false, electiveDeptApproval: false },
-  { rollNumber: 'user456', name: 'Bob Johnson', password: 'password456', homeDepartmentId: 'chemistry', semester: 3, lastSemesterPercentage: 76.0, status: 'approved', preferences: [], assignedElective: null, assignmentReason: null, homeDeptApproval: false, electiveDeptApproval: false },
-  { rollNumber: 'user789', name: 'Carol Williams', password: 'password789', homeDepartmentId: 'mathematics', semester: 7, lastSemesterPercentage: 91.2, status: 'pending', preferences: [], assignedElective: null, assignmentReason: null, homeDeptApproval: false, electiveDeptApproval: false },
+  { rollNumber: 'user123', name: 'Alice Smith', password: 'password123', homeDepartmentId: 'physics', semester: 3, lastSemesterPercentage: 88.5, status: 'approved', preferences: [], assignedElective: null, assignmentReason: null, homeDeptApproval: false, electiveDeptApproval: false, passwordResetRequested: false },
+  { rollNumber: 'user456', name: 'Bob Johnson', password: 'password456', homeDepartmentId: 'chemistry', semester: 3, lastSemesterPercentage: 76.0, status: 'approved', preferences: [], assignedElective: null, assignmentReason: null, homeDeptApproval: false, electiveDeptApproval: false, passwordResetRequested: false },
+  { rollNumber: 'user789', name: 'Carol Williams', password: 'password789', homeDepartmentId: 'mathematics', semester: 3, lastSemesterPercentage: 91.2, status: 'pending', preferences: [], assignedElective: null, assignmentReason: null, homeDeptApproval: false, electiveDeptApproval: false, passwordResetRequested: false },
 ];
 
 export const MOCK_DEPARTMENT_USERS: DepartmentUser[] = DEPARTMENTS_DATA.map(dept => ({
   id: dept.id,
   password: 'password',
-  // Use the full description for the name, it will be processed in the UI
   name: dept.description, 
-  departmentId: dept.id
+  departmentId: dept.id,
+  passwordResetRequested: false,
 }));
 
 

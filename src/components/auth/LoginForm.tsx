@@ -18,6 +18,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { KeyRound, Loader2, UserCircle, Eye, EyeOff } from "lucide-react";
 import React from "react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { useStudentData } from "@/hooks/useStudentData";
 
 const loginFormSchema = z.object({
   rollNumber: z.string().min(1, { message: "Roll number/ID is required." }),
@@ -26,11 +28,18 @@ const loginFormSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginFormSchema>;
 
+const resetRequestSchema = z.object({
+  id: z.string().min(1, { message: "Roll number or Department ID is required." }),
+});
+type ResetRequestValues = z.infer<typeof resetRequestSchema>;
+
 export function LoginForm() {
   const { login } = useAuth();
+  const { requestPasswordReset } = useStudentData();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
+  const [isResetFormOpen, setResetFormOpen] = React.useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
@@ -40,12 +49,15 @@ export function LoginForm() {
     },
   });
 
+  const resetForm = useForm<ResetRequestValues>({
+    resolver: zodResolver(resetRequestSchema),
+    defaultValues: { id: "" },
+  });
+
   async function onSubmit(values: LoginFormValues) {
     setIsLoading(true);
     try {
       await login(values.rollNumber, values.password);
-      // On success, the login function handles redirection, so we don't need to do anything here.
-      // We might not even get here if the redirect is fast enough.
     } catch (error) {
        setIsLoading(false);
        const message = error instanceof Error ? error.message : "An unknown error occurred.";
@@ -57,7 +69,27 @@ export function LoginForm() {
     }
   }
 
+  async function onResetRequestSubmit(values: ResetRequestValues) {
+    const result = await requestPasswordReset(values.id);
+     if (result.success) {
+      toast({
+        title: "Request Submitted",
+        description: "Your password reset request has been sent to the administrator for approval.",
+      });
+    } else {
+      toast({
+        title: "Request Failed",
+        description: result.message,
+        variant: "destructive",
+      });
+    }
+    setResetFormOpen(false);
+    resetForm.reset();
+  }
+
+
   return (
+    <>
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
@@ -105,6 +137,44 @@ export function LoginForm() {
             </FormItem>
           )}
         />
+        <div className="flex items-center justify-between">
+            <Dialog open={isResetFormOpen} onOpenChange={setResetFormOpen}>
+                <DialogTrigger asChild>
+                    <Button type="button" variant="link" className="p-0 h-auto text-sm">Forgot Password?</Button>
+                </DialogTrigger>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Request Password Reset</DialogTitle>
+                        <DialogDescription>
+                            Enter your ID below. A request will be sent to the administrator to reset your password.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <Form {...resetForm}>
+                        <form onSubmit={resetForm.handleSubmit(onResetRequestSubmit)} className="space-y-4 py-4">
+                             <FormField
+                                control={resetForm.control}
+                                name="id"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Your Student Roll Number or Department ID</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Enter your ID" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                                />
+                             <DialogFooter>
+                                <DialogClose asChild>
+                                <Button type="button" variant="outline">Cancel</Button>
+                                </DialogClose>
+                                <Button type="submit">Submit Request</Button>
+                            </DialogFooter>
+                        </form>
+                    </Form>
+                </DialogContent>
+            </Dialog>
+        </div>
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
             <>
@@ -117,5 +187,6 @@ export function LoginForm() {
         </Button>
       </form>
     </Form>
+    </>
   );
 }

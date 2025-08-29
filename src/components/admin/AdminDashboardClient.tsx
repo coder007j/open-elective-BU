@@ -6,7 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AllocationManager } from './AllocationManager';
 import { StudentManager } from './StudentManager';
 import { DepartmentManager } from './DepartmentManager';
-import { CheckSquare, Users, Building, Bot } from 'lucide-react';
+import { PasswordResetManager } from './PasswordResetManager';
+import { CheckSquare, Users, Building, Bot, KeyRound } from 'lucide-react';
 import type { AuthenticatedUser } from '@/types';
 
 interface AdminDashboardClientProps {
@@ -16,7 +17,7 @@ interface AdminDashboardClientProps {
 export function AdminDashboardClient({ currentUser }: AdminDashboardClientProps) {
   return (
     <Tabs defaultValue="allocation" className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
+      <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="allocation">
           <Bot className="mr-2 h-4 w-4" />
           Allocation
@@ -29,6 +30,10 @@ export function AdminDashboardClient({ currentUser }: AdminDashboardClientProps)
           <Building className="mr-2 h-4 w-4" />
           Manage Departments
         </TabsTrigger>
+        <TabsTrigger value="resets">
+          <KeyRound className="mr-2 h-4 w-4" />
+          Password Resets
+        </TabsTrigger>
       </TabsList>
       <TabsContent value="allocation" className="pt-6">
         <AllocationManager />
@@ -38,6 +43,9 @@ export function AdminDashboardClient({ currentUser }: AdminDashboardClientProps)
       </TabsContent>
       <TabsContent value="departments" className="pt-6">
         <DepartmentManager />
+      </TabsContent>
+      <TabsContent value="resets" className="pt-6">
+        <PasswordResetManager />
       </TabsContent>
     </Tabs>
   );
